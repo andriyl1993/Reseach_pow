@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,15 +15,16 @@ namespace Recearch_Pow
             ModifiedMethodsDictionary = new Dictionary<string, MethodsDelegate>();
             ModifiedMethodsDictionary.Add("Prime numbers", FunPrimeNumbers);
             ModifiedMethodsDictionary.Add("Pow_Table_0", Pow_Table_0);
+            ModifiedMethodsDictionary.Add("Pow_Table_1", Pow_Table_1);
 
             ClassicMethodsDictionary = new Dictionary<string, MethodsDelegate>();
         }
         public static Dictionary<string, MethodsDelegate> ModifiedMethodsDictionary;
         public static Dictionary<string, MethodsDelegate> ClassicMethodsDictionary;
 
-        public delegate void MethodsDelegate(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false);
-
-        public static void FunPrimeNumbers(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
+        public delegate double[,] MethodsDelegate(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false);
+        
+        public static double[,] FunPrimeNumbers(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
         {
             BigInteger max_len = length;
 
@@ -79,18 +81,62 @@ namespace Recearch_Pow
                 //for (BigInteger i = 0; i < (int)len; i++)
                 //    weight[i] = i;              
             }
+            return new double[1, 1];
         }
 
-        private static List<int> int_to_byte_array(BigInteger value)
+        private static BitArray int_to_byte_array(BigInteger value)
         {
-            List<int> result = new List<int>();
-            string _value_bytes_array = Convert.ToString((int)value, 2);
-            for (int i = 0; i < _value_bytes_array.Length; i++)
-                result.Add(int.Parse(_value_bytes_array[i].ToString()));
-            return result;
+            return new BitArray(value.ToByteArray());
         }
 
-        private static void Pow_Table_0(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
+        private static BigInteger bytes_to_int(BitArray bits, int from, int to)
+        {
+
+            int numBytes = bits.Count / 8;
+            if (bits.Count % 8 != 0) numBytes++;
+
+            byte[] bytes = new byte[numBytes];
+            int byteIndex = 0, bitIndex = 0;
+
+            for (int i = 0; i < bits.Count; i++)
+            {
+                if (bits[i])
+                    bytes[byteIndex] |= (byte)(1 << (7 - bitIndex));
+
+                bitIndex++;
+                if (bitIndex == 8)
+                {
+                    bitIndex = 0;
+                    byteIndex++;
+                }
+            }
+
+            return new BigInteger(bytes);
+        }
+
+        private static double[,] Compute_second_value(double[,] arr, int count_rand, int length)
+        {
+            for (int i = 0; i < length; i++)
+                arr[i, 1] = Math.Round(arr[i, 0] / count_rand, 5);
+            return arr;
+        }
+
+        private static double[,] Compute_third_value_with_weight(double[,] arr, double[] weights)
+        {
+            for (int i = 0; i < weights.Length; i++)
+                arr[i, 2] = Math.Round(arr[i, 1] * weights[i], 5);
+            return arr;
+        }
+
+        private static double sum_of_column(double[,] arr, int column)
+        {
+            double res = 0;
+            for (var i = 0; i < arr.Length; i++)
+                res += arr[i, column];
+            return res;
+        }
+
+        private static double[,] Pow_Table_0(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
         {
             String str_1 = "Підрахунок кількості блоків виду 10..00 (номер рядка в таблиці відповідає кількості біт у блоці). Перший елемент таблиці 1, другий 10 і т.д. Розглянуті всі числа довжиною";
             double[,] result_1 = new double[(int)n, 2];
@@ -99,17 +145,18 @@ namespace Recearch_Pow
             {
                 BigInteger value = numbers[(int)r];
                 
-                List<int> value_bytes_array = int_to_byte_array(value);
-                int index = value_bytes_array.Count-1;
+                BitArray value_bytes_array = int_to_byte_array(value);
+                bytes_to_int(value_bytes_array, 0, 0);
+                int index = value_bytes_array.Length - 1;
                 while(index >= 0)
                 {
                     long counter = -1;
-                    if (value_bytes_array[index] == 1)
+                    if (value_bytes_array[index])
                     {
                         counter += 1;
                         index -= 1;
-                        if (index != -1 && value_bytes_array[index] == 0)
-                            while (index != -1 && value_bytes_array[index] == 0)
+                        if (index != -1 && !value_bytes_array[index])
+                            while (index != -1 && !value_bytes_array[index])
                             {
                                 index -= 1;
                                 counter += 1;
@@ -120,8 +167,7 @@ namespace Recearch_Pow
                         index -= 1;
                 }
             }
-            for (int i = 0; i < n; i++)
-                result_1[i, 1] = Math.Round((double)result_1[i, 0]/(double)count_rand, 5);
+            result_1 = Compute_second_value(result_1, (int)count_rand, (int)n);
             BigInteger[] arr = Enumerable.Range(1, (int)n).Select(x => (BigInteger)x).ToArray();
             // printmatVarCols(result_1, str_1, string.Join("", arr),   '1 2', 4);
             Console.WriteLine("1 - кількість блоків виду 10..00(довжина блоку дорівнює номеру рядка таблиці)");
@@ -137,17 +183,17 @@ namespace Recearch_Pow
             for (double r = 0; r < (double)count_rand; r++)
             {
                 BigInteger value = numbers[(int)r];
-                List<int> value_bytes_array = int_to_byte_array(value);
-                int index = value_bytes_array.Count - 1;
+                BitArray value_bytes_array = int_to_byte_array(value);
+                int index = value_bytes_array.Length - 1;
                 while (index >= 0)
                 {
                     long counter = -1;
-                    if (value_bytes_array[index] == 1)
+                    if (value_bytes_array[index])
                     {
                         counter += 1;
                         index -= 1;
-                        if (index != -1 && value_bytes_array[index] == 0)
-                            while (index != -1 && counter < length && value_bytes_array[index] == 0)
+                        if (index != -1 && !value_bytes_array[index])
+                            while (index != -1 && counter < length && !value_bytes_array[index])
                             {
                                 index -= 1;
                                 counter += 1;
@@ -158,8 +204,8 @@ namespace Recearch_Pow
                         index -= 1;
                 }
             }
-            for (int i = 0; i < length + 1; i++)
-                result_2[i, 1] = Math.Round((double)result_2[i, 0] / (double)count_rand, 5);
+            
+            result_2 = Compute_second_value(result_2, (int)count_rand, (int)length + 1);
 
             // !!!!! Питання стосовно множення на 0
             // в середньому на скільки операцій множення буде менше
@@ -178,6 +224,59 @@ namespace Recearch_Pow
             Console.WriteLine("3 - в середньому на скільки операцій множення буде менше");
             Console.WriteLine();
             Console.WriteLine();
+            return result_2;
+        }
+
+        private static double[,] Pow_Table_1(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
+        {
+            double log2_length = Math.Log((int)length + 1, 2) + 2;
+            String str1 = "Підрахунок кількості блоків для модифікованої класичної таблиці передобчислень #2 (на початку дві одиниці  замість однієї). Довжина вікна " + log2_length.ToString();
+            str1 += " біт. Кількість елементів таблиці " + length.ToString();
+            str1 += ". Розглянуті всі числа довжиною " + n.ToString() + " біт";
+            double[,] result_1 = new double[(int)length + 1, 2];
+            int count_rand = numbers.Count;
+            for (int r = 0; r < count_rand; r++)
+            {
+                BigInteger value = numbers[r];
+                BitArray bit_value = int_to_byte_array(value);
+                int bit_value_length = bit_value.Length - 1; // j
+                while(bit_value_length >= 0)
+                {
+                    if (bit_value_length > log2_length && bit_value[bit_value_length] && bit_value[bit_value_length-1])
+                    {
+                        bit_value_length -= 2;
+                        BigInteger _val = bytes_to_int(bit_value, (int)(bit_value_length - log2_length + 3.0), bit_value_length + 1);
+                        if (_val > 0)
+                        {
+                            result_1[(int)value, 0]++;
+                            bit_value_length = bit_value_length - (int)log2_length + 2;
+                        }
+                    }
+                    else
+                        bit_value_length--;
+                }
+            }
+            double[] weight = new double[(int)length+1];
+            for (int i = 0; i < length; i++)
+            {
+                var _index = (BigInteger)i;
+                BitArray i_bytes_arr = int_to_byte_array(_index);
+                double ones_sum = 0;
+                for (int j = 0; j < i_bytes_arr.Length; j++)
+                    ones_sum += i_bytes_arr[j] ? 1 : 0;
+                weight[i] = ones_sum + 1;
+            }
+            
+            result_1 = Compute_second_value(result_1, (int)count_rand, (int)n);
+            result_1 = Compute_third_value_with_weight(result_1, weight);
+            result_1[(int)length, 2] = sum_of_column(result_1, 2);
+            double count_mult = result_1[(int)length, 2];
+            BigInteger[] arr = Enumerable.Range(1, (int)length + 1).Select(x => (BigInteger)x).ToArray();
+            // printmatVarCols(result_1, str_1, string.Join("", arr), '1 2 3', 4);
+            Console.WriteLine("1 - кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2");
+            Console.WriteLine("2 - середня кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2, що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
+            Console.WriteLine("3 - в середньому на скільки операцій множення буде менше");
+            return result_1;
         }
 
         private static int[] list_prime = {
