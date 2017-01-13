@@ -131,7 +131,7 @@ namespace Recearch_Pow
         private static double sum_of_column(double[,] arr, int column)
         {
             double res = 0;
-            for (var i = 0; i < arr.Length; i++)
+            for (var i = 0; i < arr.GetLength(0); i++)
                 res += arr[i, column];
             return res;
         }
@@ -233,7 +233,7 @@ namespace Recearch_Pow
             String str1 = "Підрахунок кількості блоків для модифікованої класичної таблиці передобчислень #2 (на початку дві одиниці  замість однієї). Довжина вікна " + log2_length.ToString();
             str1 += " біт. Кількість елементів таблиці " + length.ToString();
             str1 += ". Розглянуті всі числа довжиною " + n.ToString() + " біт";
-            double[,] result_1 = new double[(int)length + 1, 2];
+            double[,] result_1 = new double[(int)length + 1, 3];
             int count_rand = numbers.Count;
             for (int r = 0; r < count_rand; r++)
             {
@@ -248,7 +248,7 @@ namespace Recearch_Pow
                         BigInteger _val = bytes_to_int(bit_value, (int)(bit_value_length - log2_length + 3.0), bit_value_length + 1);
                         if (_val > 0)
                         {
-                            result_1[(int)value, 0]++;
+                            result_1[(int)_val, 0]++;
                             bit_value_length = bit_value_length - (int)log2_length + 2;
                         }
                     }
@@ -267,7 +267,7 @@ namespace Recearch_Pow
                 weight[i] = ones_sum + 1;
             }
             
-            result_1 = Compute_second_value(result_1, (int)count_rand, (int)n);
+            result_1 = Compute_second_value(result_1, (int)count_rand, (int)length + 1);
             result_1 = Compute_third_value_with_weight(result_1, weight);
             result_1[(int)length, 2] = sum_of_column(result_1, 2);
             double count_mult = result_1[(int)length, 2];
