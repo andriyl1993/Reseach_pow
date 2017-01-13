@@ -207,7 +207,6 @@ namespace Recearch_Pow
             
             result_2 = Compute_second_value(result_2, (int)count_rand, (int)length + 1);
 
-            // !!!!! Питання стосовно множення на 0
             // в середньому на скільки операцій множення буде менше
             var _tmp_arr = new double[(int)length + 1]; 
             for (int i = 0; i < length + 1; i++)
@@ -290,122 +289,80 @@ namespace Recearch_Pow
                 {
                     BigInteger value = numbers[r];
                     List<BigInteger> work_arr = numbers.GetRange(r, numbers.Count - r);
+                    int j_length_t = work_arr.Count - 1;
+                    while (j_length_t >= 0)
+                    {
+                        int counter = -1;
+                        if (work_arr[j_length_t] == 1)
+                        {
+                            while (j_length_t != 0 && work_arr[j_length_t] == 1)
+                            {
+                                j_length_t--;
+                                counter++;
+                            }
+                            if (counter > 0)
+                                result_1[counter - 1, 0]++;
+                        }
+                        else
+                            j_length_t--;
+                    }
                 }
+                result_1 = Compute_second_value(result_1, (int)count_rand, (int)length + 1);
+                BigInteger[] arr = Enumerable.Range(1, (int)length + 1).Select(x => (BigInteger)x).ToArray();
+                // printmatVarCols(result_2, str_2, string.Join("", arr),   '1 2', 4);
+                Console.WriteLine("1 - кількість блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1)");
+                Console.WriteLine("2 - середня блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1), що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
+
+
+                string str2 = "Підрахунок кількості блоків виду 11..11 з обмеженою довжиною вікна. Максимально можлива довжина вікна ', sim2str(len), ' біт. Кількість елементів таблиці " + length.ToString() + ". Розглянуті всі числа довжиною " + n.ToString() + " біт";
+                BigInteger max_length = length;
+                int count_mult_optimal = -100000;
+
+                BigInteger len_optimal = 0;
+                var result_optimal = new double[(int)length + 1, 3]; ;
+                for (length = 2; length < max_length; length++)
+                {
+                    double[,] result_2 = new double[(int)length + 1, 3];
+                    count_rand = numbers.Count;
+                    for (int r = 0; r < count_rand; r++)
+                    {
+                        List<BigInteger> work_arr = numbers.GetRange(r, numbers.Count - r);
+                        int j_length_values = work_arr.Count;
+                        while (j_length_values >= 0)
+                        {
+                            int counter = -1;
+                            if (work_arr[j_length_values] == 1)
+                            {
+                                while (j_length_values != 0 && counter < length && work_arr[j_length_values] == 1)
+                                {
+                                    j_length_values--;
+                                    counter++;
+                                }
+                                if (counter > 0)
+                                    result_2[counter - 1, 0]++;
+                            }
+                            else
+                                j_length_values--;
+                        }
+                    }
+                    result_2 = Compute_second_value(result_2, (int)count_rand, (int)length + 1);
+                    double[] iterate_array = new double[(int)length + 1];
+                    for (var i = 0; i < (int)length + 1; i++)
+                        iterate_array[i] = i+1;
+                    result_2 = Compute_third_value_with_weight(result_1, iterate_array);
+                    result_2[(int)length, 2] = sum_of_column(result_2, 2);
+                    double count_mult = result_2[(int)length, 2] - 2 * (double)length;
+
+                    if (count_mult > count_mult_optimal)
+                    {
+                        len_optimal = length;
+                        result_optimal = result_2;
+                        count_mult_optimal = (int)count_mult;
+                    }
+                }
+                arr = Enumerable.Range(1, (int)len_optimal + 1).Select(x => (BigInteger)x).ToArray();
+                //printmatVarCols(result_optimal, str_2, string.Join("", arr), '1 2 3', 4);
             }
-//            t = rand(r,:);
-//            j = length(t);
-//            while (j > 0)
-//                k = 0;
-//            if (t(j) == 1)
-//                while (j ~= 0 && t(j) == 1)
-//                j = j - 1;
-//            k = k + 1;
-//            end
-//            if (k > 1)
-//                result_1(k - 1, 1) = result_1(k - 1, 1) + 1;
-//            end
-//        else
-//            j = j - 1;
-//            end
-//        end
-//end
-
-//% --------------------------------------------------------------------------------------
-//% result_1(:, 2) = round(result_1(:, 1) / pow2(n), 5); % â ñåðåäíüîìó ñê³ëüêè áëîê³â ç â³äïîâ³äíî¿ ê³ëüêîñò³ îäèíèöü çóñòð÷àºòüñÿ ó ÷èñë³
-//result_1(:, 2) = round(result_1(:, 1) / count_rand, 5); % â ñåðåäíüîìó ñê³ëüêè áëîê³â ç â³äïîâ³äíî¿ ê³ëüêîñò³ îäèíèöü çóñòð÷àºòüñÿ ó ÷èñë³
-//% --------------------------------------------------------------------------------------
-
-//printmatVarCols(result_1, str_1, int2str(1:n), '1 2', 4);
-
-//            disp('1 - ê³ëüê³ñòü áëîê³â âèäó 11..11 (äîâæèíà áëîêó äîð³âíþº íîìåðó ðÿäêà òàáëèö³ ïëþñ 1)')
-//disp(['2 - ñåðåäíÿ áëîê³â âèäó 11..11 (äîâæèíà áëîêó äîð³âíþº íîìåðó ðÿäêà òàáëèö³ ïëþñ 1), ùî çóñòð³÷àºòüñÿ ó îäíîìó ÷èñë³, ùî ìàº äîâæèíó ', sim2str(n), ' á³ò'])
-//disp(sprintf('\n'));
-//            toc
-//disp(sprintf('\n\n'));
-
-//            disp('1 - ê³ëüê³ñòü áëîê³â âèäó 11..11 (äîâæèíà áëîêó äîð³âíþº íîìåðó ðÿäêà òàáëèö³ ïëþñ 1)')
-//disp(['2 - ñåðåäíÿ áëîê³â âèäó 11..11 (äîâæèíà áëîêó äîð³âíþº íîìåðó ðÿäêà òàáëèö³ ïëþñ 1), ùî çóñòð³÷àºòüñÿ ó îäíîìó ÷èñë³, ùî ìàº äîâæèíó ', sim2str(n), ' á³ò'])
-//disp(sprintf('\n'));
-//            toc
-//disp(sprintf('\n\n'));
-
-//            end
-
-
-//            tic
-//str_2 = ['Ï³äðàõóíîê ê³ëüêîñò³ áëîê³â âèäó 11..11 ç îáìåæåíîþ äîâæèíîþ â³êíà. Ìàêñèìàëüíî ìîæëèâà äîâæèíà â³êíà ', sim2str(len), ' á³ò. Ê³ëüê³ñòü åëåìåíò³â òàáëèö³ ', sim2str(len), '. Ðîçãëÿíóò³ âñ³ ÷èñëà äîâæèíîþ ', sim2str(n), ' á³ò'];
-
-//% log2_max = log2(len + 1);
-//% count_mult_optimal = 0;
-//%
-//% for log_len = 2:log2_max
-//%
-//% len = pow2(log_len) - 1;
-//max_len = len;
-
-//count_mult_optimal = -100000;
-
-//            for len = 2:max_len
-            
-
-//            result_2 = zeros(len + 1, 3);
-//            % --------------------------------------------------------------------------------------
-//            % for i = 1:pow2(n) - 1
-//            temp = size(rand);
-//            % count_rand = temp(2);
-//            count_rand = temp(1);
-//            for r = 1:count_rand
-//            % i = rand(r);
-//            % i = randi(pow2(n) - 1);
-//            % --------------------------------------------------------------------------------------
-//            % t = de2bi(i);
-//            t = rand(r,:);
-//            j = length(t);
-//            while (j > 0)
-//                k = 0;
-//            if (t(j) == 1)
-//                while (j ~= 0 && k <= len && t(j) == 1)
-//                j = j - 1;
-//            k = k + 1;
-//            end
-//            if (k > 1)
-//                result_2(k - 1, 1) = result_2(k - 1, 1) + 1;
-//            end
-//        else
-//            j = j - 1;
-//            end
-//        end
-//end
-
-//% --------------------------------------------------------------------------------------
-//% result_2(:, 2) = round(result_2(:, 1) / pow2(n), 5); % â ñåðåäíüîìó ñê³ëüêè áëîê³â ç â³äïîâ³äíî¿ ê³ëüêîñò³ îäèíèöü çóñòð÷àºòüñÿ ó ÷èñë³
-//result_2(:, 2) = round(result_2(:, 1) / count_rand, 5); % â ñåðåäíüîìó ñê³ëüêè áëîê³â ç â³äïîâ³äíî¿ ê³ëüêîñò³ îäèíèöü çóñòð÷àºòüñÿ ó ÷èñë³
-//% --------------------------------------------------------------------------------------
-//result_2(:, 3) = round(result_2(:, 2).* (1:1:len + 1)',5); % â ñåðåäíüîìó íà ñê³ëüêè îïåðàö³é ìíîæåííÿ áóäå ìåíøå
-//result_2(len + 1, 3) = sum(result_2(:, 3));
-//            count_mult = result_2(len + 1, 3);
-//            count_mult = count_mult - 2 * len; % â³äíÿòè ê³ëüê³ñòü îïåðàö³é íà ïîáóäîâó òàáëèö³
-
-//if (count_mult > count_mult_optimal)
-//                len_optimal = len;
-//            result_optimal = result_2;
-//            count_mult_optimal = count_mult;
-//            end
-
-//            end
-
-
-//printmatVarCols(result_optimal, str_2, int2str(1:len_optimal + 1), '1 2 3', 4);
-
-//            disp(['1 - ê³ëüê³ñòü áëîê³â âèäó 11..11 (äîâæèíà áëîêó äîð³âíþº íîìåðó ðÿäêà òàáëèö³ ïëþñ 1) â óñ³õ ÷èñëàõ äîâæèíè ', sim2str(n), ' á³ò'])
-//disp(['2 - ñåðåäíÿ ê³ëüê³ñòü áëîê³â âèäó 11..11 (äîâæèíà áëîêó äîð³âíþº íîìåðó ðÿäêà òàáëèö³ ïëþñ 1), ùî çóñòð³÷àºòüñÿ ó îäíîìó ÷èñë³, ùî ìàº äîâæèíó ', sim2str(n), ' á³ò'])
-//disp(['3 - â ñåðåäíüîìó íà ñê³ëüêè îïåðàö³é ìíîæåííÿ áóäå ìåíøå'])
-//disp(sprintf('\n'));
-//            disp(['Îïòèìàëüíà ê³ëüê³ñòü åëåìåíò³â òàáëèö³ äîð³âíþº ', num2str(len_optimal)])
-//disp(['Çàãàëüíå çìåíøåííÿ ê³ëüêîñò³ îïåðàö³é ìíîæåííÿ äîð³âíþº ', num2str(count_mult_optimal)])
-//count_mult = count_mult_optimal;
-//            toc
-//disp(sprintf('\n\n'));
         }
 
         private static int[] list_prime = {
