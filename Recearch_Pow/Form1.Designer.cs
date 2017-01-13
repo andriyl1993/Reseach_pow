@@ -57,7 +57,8 @@
             this.checkedListBoxModified.FormattingEnabled = true;
             this.checkedListBoxModified.Items.AddRange(new object[] {
             "Prime Numbers",
-            "Pow_Table_0"});
+            "Pow_Table_0",
+            "Pow_Table_1"});
             this.checkedListBoxModified.Location = new System.Drawing.Point(200, 42);
             this.checkedListBoxModified.Name = "checkedListBoxModified";
             this.checkedListBoxModified.Size = new System.Drawing.Size(172, 319);
