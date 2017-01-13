@@ -88,10 +88,12 @@ namespace Recearch_Pow
             return result;
         }
 
-        private static BigInteger bytes_to_int(byte[] arr, int start, int end)
+        private static BigInteger bytes_to_int(List<int> arr, int start, int end)
         {
-            String bytes_str = System.Text.Encoding.UTF8.GetString(arr, start, end);
-            return BigInteger.Parse(bytes_str);
+            var res = Array.ConvertAll(arr.ToArray(), new Converter<int, string>((int x) => x.ToString()));
+            String bytes_str = String.Join("", res, start, end-start);
+            long val = Convert.ToInt64(bytes_str, 2);
+            return BigInteger.Parse(val.ToString());
         }
 
         private static double[,] Compute_second_value(double[,] arr, int count_rand, int length)
@@ -111,7 +113,7 @@ namespace Recearch_Pow
         private static double sum_of_column(double[,] arr, int column)
         {
             double res = 0;
-            for (var i = 0; i < arr.Length; i++)
+            for (var i = 0; i < arr.GetLength(0); i++)
                 res += arr[i, column];
             return res;
         }
@@ -162,8 +164,8 @@ namespace Recearch_Pow
             for (double r = 0; r < (double)count_rand; r++)
             {
                 BigInteger value = numbers[(int)r];
-                byte[] value_bytes_array = int_to_byte_array(value);
-                int index = value_bytes_array.Length - 1;
+                List<int> value_bytes_array = int_to_byte_array(value);
+                int index = value_bytes_array.Count - 1;
                 while (index >= 0)
                 {
                     long counter = -1;
@@ -212,13 +214,13 @@ namespace Recearch_Pow
             String str1 = "Підрахунок кількості блоків для модифікованої класичної таблиці передобчислень #2 (на початку дві одиниці  замість однієї). Довжина вікна " + log2_length.ToString();
             str1 += " біт. Кількість елементів таблиці " + length.ToString();
             str1 += ". Розглянуті всі числа довжиною " + n.ToString() + " біт";
-            double[,] result_1 = new double[(int)length + 1, 2];
+            double[,] result_1 = new double[(int)length + 1, 3];
             int count_rand = numbers.Count;
             for (int r = 0; r < count_rand; r++)
             {
                 BigInteger value = numbers[r];
-                byte[] bit_value = int_to_byte_array(value);
-                int bit_value_length = bit_value.Length - 1; // j
+                List<int> bit_value = int_to_byte_array(value);
+                int bit_value_length = bit_value.Count - 1; // j
                 while(bit_value_length >= 0)
                 {
                     if (bit_value_length > log2_length && bit_value[bit_value_length] == 1 && bit_value[bit_value_length-1] == 1)
@@ -227,7 +229,7 @@ namespace Recearch_Pow
                         BigInteger _val = bytes_to_int(bit_value, (int)(bit_value_length - log2_length + 3.0), bit_value_length + 1);
                         if (_val > 0)
                         {
-                            result_1[(int)value, 0]++;
+                            result_1[(int)_val, 0]++;
                             bit_value_length = bit_value_length - (int)log2_length + 2;
                         }
                     }
@@ -239,14 +241,14 @@ namespace Recearch_Pow
             for (int i = 0; i < length; i++)
             {
                 var _index = (BigInteger)i;
-                byte[] i_bytes_arr = int_to_byte_array(_index);
+                List<int> i_bytes_arr = int_to_byte_array(_index);
                 double ones_sum = 0;
-                for (int j = 0; j < i_bytes_arr.Length; j++)
+                for (int j = 0; j < i_bytes_arr.Count; j++)
                     ones_sum += i_bytes_arr[j];
                 weight[i] = ones_sum + 1;
             }
             
-            result_1 = Compute_second_value(result_1, (int)count_rand, (int)n);
+            result_1 = Compute_second_value(result_1, (int)count_rand, (int)length + 1);
             result_1 = Compute_third_value_with_weight(result_1, weight);
             result_1[(int)length, 2] = sum_of_column(result_1, 2);
             double count_mult = result_1[(int)length, 2];
