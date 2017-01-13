@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,14 +12,18 @@ namespace Recearch_Pow
     {
         static Methods()
         {
-            MethodsList = new List<MethodsDelegate>();
-            MethodsList.Add(FunPrimeNumbers);
-            MethodsList.Add(Pow_Table_0);
-            MethodsList.Add(Pow_Table_1);
-        }
-        public static List<MethodsDelegate> MethodsList;
-        public delegate double[,] MethodsDelegate(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false);
+            ModifiedMethodsDictionary = new Dictionary<string, MethodsDelegate>();
+            ModifiedMethodsDictionary.Add("Prime numbers", FunPrimeNumbers);
+            ModifiedMethodsDictionary.Add("Pow_Table_0", Pow_Table_0);
+            ModifiedMethodsDictionary.Add("Pow_Table_1", Pow_Table_1);
 
+            ClassicMethodsDictionary = new Dictionary<string, MethodsDelegate>();
+        }
+        public static Dictionary<string, MethodsDelegate> ModifiedMethodsDictionary;
+        public static Dictionary<string, MethodsDelegate> ClassicMethodsDictionary;
+
+        public delegate double[,] MethodsDelegate(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false);
+        
         public static double[,] FunPrimeNumbers(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
         {
             BigInteger max_len = length;
@@ -79,21 +84,34 @@ namespace Recearch_Pow
             return new double[1, 1];
         }
 
-        private static List<int> int_to_byte_array(BigInteger value)
+        private static BitArray int_to_byte_array(BigInteger value)
         {
-            List<int> result = new List<int>();
-            string _value_bytes_array = Convert.ToString((int)value, 2);
-            for (int i = 0; i < _value_bytes_array.Length; i++)
-                result.Add(int.Parse(_value_bytes_array[i].ToString()));
-            return result;
+            return new BitArray(value.ToByteArray());
         }
 
-        private static BigInteger bytes_to_int(List<int> arr, int start, int end)
+        private static BigInteger bytes_to_int(BitArray bits, int from, int to)
         {
-            var res = Array.ConvertAll(arr.ToArray(), new Converter<int, string>((int x) => x.ToString()));
-            String bytes_str = String.Join("", res, start, end-start);
-            long val = Convert.ToInt64(bytes_str, 2);
-            return BigInteger.Parse(val.ToString());
+
+            int numBytes = bits.Count / 8;
+            if (bits.Count % 8 != 0) numBytes++;
+
+            byte[] bytes = new byte[numBytes];
+            int byteIndex = 0, bitIndex = 0;
+
+            for (int i = 0; i < bits.Count; i++)
+            {
+                if (bits[i])
+                    bytes[byteIndex] |= (byte)(1 << (7 - bitIndex));
+
+                bitIndex++;
+                if (bitIndex == 8)
+                {
+                    bitIndex = 0;
+                    byteIndex++;
+                }
+            }
+
+            return new BigInteger(bytes);
         }
 
         private static double[,] Compute_second_value(double[,] arr, int count_rand, int length)
@@ -127,17 +145,18 @@ namespace Recearch_Pow
             {
                 BigInteger value = numbers[(int)r];
                 
-                List<int> value_bytes_array = int_to_byte_array(value);
-                int index = value_bytes_array.Count-1;
+                BitArray value_bytes_array = int_to_byte_array(value);
+                bytes_to_int(value_bytes_array, 0, 0);
+                int index = value_bytes_array.Length - 1;
                 while(index >= 0)
                 {
                     long counter = -1;
-                    if (value_bytes_array[index] == 1)
+                    if (value_bytes_array[index])
                     {
                         counter += 1;
                         index -= 1;
-                        if (index != -1 && value_bytes_array[index] == 0)
-                            while (index != -1 && value_bytes_array[index] == 0)
+                        if (index != -1 && !value_bytes_array[index])
+                            while (index != -1 && !value_bytes_array[index])
                             {
                                 index -= 1;
                                 counter += 1;
@@ -164,17 +183,17 @@ namespace Recearch_Pow
             for (double r = 0; r < (double)count_rand; r++)
             {
                 BigInteger value = numbers[(int)r];
-                List<int> value_bytes_array = int_to_byte_array(value);
-                int index = value_bytes_array.Count - 1;
+                BitArray value_bytes_array = int_to_byte_array(value);
+                int index = value_bytes_array.Length - 1;
                 while (index >= 0)
                 {
                     long counter = -1;
-                    if (value_bytes_array[index] == 1)
+                    if (value_bytes_array[index])
                     {
                         counter += 1;
                         index -= 1;
-                        if (index != -1 && value_bytes_array[index] == 0)
-                            while (index != -1 && counter < length && value_bytes_array[index] == 0)
+                        if (index != -1 && !value_bytes_array[index])
+                            while (index != -1 && counter < length && !value_bytes_array[index])
                             {
                                 index -= 1;
                                 counter += 1;
@@ -219,11 +238,11 @@ namespace Recearch_Pow
             for (int r = 0; r < count_rand; r++)
             {
                 BigInteger value = numbers[r];
-                List<int> bit_value = int_to_byte_array(value);
-                int bit_value_length = bit_value.Count - 1; // j
+                BitArray bit_value = int_to_byte_array(value);
+                int bit_value_length = bit_value.Length - 1; // j
                 while(bit_value_length >= 0)
                 {
-                    if (bit_value_length > log2_length && bit_value[bit_value_length] == 1 && bit_value[bit_value_length-1] == 1)
+                    if (bit_value_length > log2_length && bit_value[bit_value_length] && bit_value[bit_value_length-1])
                     {
                         bit_value_length -= 2;
                         BigInteger _val = bytes_to_int(bit_value, (int)(bit_value_length - log2_length + 3.0), bit_value_length + 1);
@@ -241,10 +260,10 @@ namespace Recearch_Pow
             for (int i = 0; i < length; i++)
             {
                 var _index = (BigInteger)i;
-                List<int> i_bytes_arr = int_to_byte_array(_index);
+                BitArray i_bytes_arr = int_to_byte_array(_index);
                 double ones_sum = 0;
-                for (int j = 0; j < i_bytes_arr.Count; j++)
-                    ones_sum += i_bytes_arr[j];
+                for (int j = 0; j < i_bytes_arr.Length; j++)
+                    ones_sum += i_bytes_arr[j] ? 1 : 0;
                 weight[i] = ones_sum + 1;
             }
             
