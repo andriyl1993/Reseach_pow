@@ -11,11 +11,15 @@ namespace Recearch_Pow
     {
         static Methods()
         {
-            MethodsList = new List<MethodsDelegate>();
-            MethodsList.Add(FunPrimeNumbers);
-            MethodsList.Add(Pow_Table_0);
+            ModifiedMethodsDictionary = new Dictionary<string, MethodsDelegate>();
+            ModifiedMethodsDictionary.Add("Prime numbers", FunPrimeNumbers);
+            ModifiedMethodsDictionary.Add("Pow_Table_0", Pow_Table_0);
+
+            ClassicMethodsDictionary = new Dictionary<string, MethodsDelegate>();
         }
-        public static List<MethodsDelegate> MethodsList;
+        public static Dictionary<string, MethodsDelegate> ModifiedMethodsDictionary;
+        public static Dictionary<string, MethodsDelegate> ClassicMethodsDictionary;
+
         public delegate void MethodsDelegate(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false);
 
         public static void FunPrimeNumbers(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)

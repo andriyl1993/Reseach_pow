@@ -16,7 +16,11 @@ namespace Recearch_Pow
         public Form1()
         {
             InitializeComponent();
-            checkedListBoxModified.SetItemChecked(0, true);
+            foreach (var method in Methods.ModifiedMethodsDictionary)
+                checkedListBoxModified.Items.Add(method.Key, true);
+
+            foreach (var method in Methods.ClassicMethodsDictionary)
+                checkedListBoxModified.Items.Add(method.Key, true);
         }
 
         private void buttonStart_Click(object sender, EventArgs e)
@@ -43,7 +47,7 @@ namespace Recearch_Pow
             for (int i = 0; i < checkedListBoxModified.Items.Count; i++)
             {
                 if (checkedListBoxModified.GetItemChecked(i))
-                    Methods.MethodsList[i](length, n, numbers, isRand);
+                    Methods.ModifiedMethodsDictionary[checkedListBoxModified.Items[i].ToString()](length, n, numbers, isRand);
             }
         }
     }
