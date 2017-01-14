@@ -97,5 +97,22 @@ namespace Recearch_Pow
             // for (int colIndex = row.FirstColIndex; colIndex <= row.LastColIndex; colIndex++)
             //     Cell cell = row.GetCell(colIndex);
         }
+
+        static public void WriteMethodsResult(Dictionary<string, double[,]> results)
+        {
+            foreach (var dict in results)
+            {
+                double[,] result = dict.Value;
+                object[,] arr = new object[result.GetLength(0) + 1, result.GetLength(1)];
+
+                arr[0, 0] = dict.Key;
+
+                for (int i = 0; i < result.GetLength(0); i++)
+                    for (int j = 0; j < result.GetLength(1); j++)
+                        arr[i + 1, j] = result[i, j];
+
+                WriteToExcel("methods--" + DateTime.Now.ToString("yyyy-MM-dd,hh-mm-ss") + ".xls", dict.Key, arr);
+            }
+        }
     }
 }
