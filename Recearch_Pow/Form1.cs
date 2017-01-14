@@ -39,34 +39,49 @@ namespace Recearch_Pow
             //};
             //Output.WriteToExcel("excel.xls", "sheet1", array, 6, 0);
             //Output.WriteToExcel("excel.xls", "sheet2", array, 1, 0);
-            BigInteger length, n;
-            BigInteger.TryParse(textBoxLength.Text, out length);
-            BigInteger.TryParse(textBoxBits.Text, out n);
 
-            BigInteger max_number = new BigInteger(Math.Pow(2, (double)n));
+            DateTime start = DateTime.Now;
 
-            List<BigInteger> numbers = new List<BigInteger>();
+            List<int> lengthList = Generating.ParseIntervals(textBoxLength.Text, Generating.IsCorrectLength);
+            List<int> nList = Generating.ParseIntervals(textBoxBits.Text);
 
-            bool isRand = radioButtonRand.Checked;
+            foreach (int length in lengthList)
+                foreach (int n in nList)
+                {
 
-            if (isRand)
-            {
-                int rand_count = Int32.Parse(textBoxRandomNumbers.Text);
-                Random r = new Random();
+                    BigInteger max_number = new BigInteger(Math.Pow(2, (double)n));
 
-                for (int i = 0; i < rand_count; i++)
-                    numbers.Add(r.Next() % max_number);
-            }
+                    List<BigInteger> numbers = new List<BigInteger>();
 
-            Dictionary<string, double[,]> results = new Dictionary<string, double[,]>();
+                    bool isRand = radioButtonRand.Checked;
 
-            for (int i = 0; i < checkedListBoxModified.Items.Count; i++)
-            {
-                if (checkedListBoxModified.GetItemChecked(i))
-                    results.Add(checkedListBoxModified.Items[i].ToString(), Methods.ModifiedMethodsDictionary[checkedListBoxModified.Items[i].ToString()](length, n, numbers, isRand));
-            }
+                    if (isRand)
+                    {
+                        int rand_count = Int32.Parse(textBoxRandomNumbers.Text);
+                        Random r = new Random();
 
-            Output.WriteMethodsResult(results);
+                        for (int i = 0; i < rand_count; i++)
+                            numbers.Add(r.Next() % max_number);
+                    }
+
+                    Dictionary<string, double[,]> results = new Dictionary<string, double[,]>();
+
+                    for (int i = 0; i < checkedListBoxModified.Items.Count; i++)
+                    {
+                        if (checkedListBoxModified.GetItemChecked(i))
+                            results.Add(checkedListBoxModified.Items[i].ToString(), Methods.ModifiedMethodsDictionary[checkedListBoxModified.Items[i].ToString()](length, n, numbers, isRand));
+                    }
+
+                    string filename = "methods--" + start.ToString("yyyy-MM-dd,hh-mm-ss") + ".xls";
+                    Output.WriteMethodsResult(filename, length, n, results);
+                }
+
+            MessageBox.Show("success");
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

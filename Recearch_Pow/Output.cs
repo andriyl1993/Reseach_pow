@@ -98,7 +98,7 @@ namespace Recearch_Pow
             //     Cell cell = row.GetCell(colIndex);
         }
 
-        static public void WriteMethodsResult(Dictionary<string, double[,]> results)
+        static public void WriteMethodsResult(string filename, int length, int n, Dictionary<string, double[,]> results)
         {
             foreach (var dict in results)
             {
@@ -111,7 +111,7 @@ namespace Recearch_Pow
                     for (int j = 0; j < result.GetLength(1); j++)
                         arr[i + 1, j] = result[i, j];
 
-                WriteToExcel("methods--" + DateTime.Now.ToString("yyyy-MM-dd,hh-mm-ss") + ".xls", dict.Key, arr);
+                WriteToExcel(filename, dict.Key + " len:" + length + " n:" + n, arr);
             }
         }
     }

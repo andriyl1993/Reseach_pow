@@ -41,7 +41,7 @@
             this.textBoxLength = new System.Windows.Forms.TextBox();
             this.textBoxBits = new System.Windows.Forms.TextBox();
             this.buttonStart = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.buttonCompare = new System.Windows.Forms.Button();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -143,7 +143,7 @@
             this.textBoxLength.Name = "textBoxLength";
             this.textBoxLength.Size = new System.Drawing.Size(100, 20);
             this.textBoxLength.TabIndex = 10;
-            this.textBoxLength.Text = "7";
+            this.textBoxLength.Text = "3-15-4";
             // 
             // textBoxBits
             // 
@@ -151,7 +151,7 @@
             this.textBoxBits.Name = "textBoxBits";
             this.textBoxBits.Size = new System.Drawing.Size(100, 20);
             this.textBoxBits.TabIndex = 11;
-            this.textBoxBits.Text = "40";
+            this.textBoxBits.Text = "40,60,80";
             // 
             // buttonStart
             // 
@@ -163,21 +163,22 @@
             this.buttonStart.UseVisualStyleBackColor = true;
             this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
             // 
-            // button1
+            // buttonCompare
             // 
-            this.button1.Location = new System.Drawing.Point(465, 180);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(99, 38);
-            this.button1.TabIndex = 13;
-            this.button1.Text = "Compare Classic and Modified";
-            this.button1.UseVisualStyleBackColor = true;
+            this.buttonCompare.Location = new System.Drawing.Point(465, 180);
+            this.buttonCompare.Name = "buttonCompare";
+            this.buttonCompare.Size = new System.Drawing.Size(99, 38);
+            this.buttonCompare.TabIndex = 13;
+            this.buttonCompare.Text = "Compare Classic and Modified";
+            this.buttonCompare.UseVisualStyleBackColor = true;
+            this.buttonCompare.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(827, 372);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.buttonCompare);
             this.Controls.Add(this.buttonStart);
             this.Controls.Add(this.textBoxBits);
             this.Controls.Add(this.textBoxLength);
@@ -212,7 +213,7 @@
         private System.Windows.Forms.TextBox textBoxLength;
         private System.Windows.Forms.TextBox textBoxBits;
         private System.Windows.Forms.Button buttonStart;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button buttonCompare;
     }
 }
 
