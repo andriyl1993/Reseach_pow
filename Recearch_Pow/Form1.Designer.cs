@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.checkedListBoxStandard = new System.Windows.Forms.CheckedListBox();
+            this.checkedListBoxClassic = new System.Windows.Forms.CheckedListBox();
             this.checkedListBoxModified = new System.Windows.Forms.CheckedListBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -44,13 +44,13 @@
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // checkedListBoxStandard
+            // checkedListBoxClassic
             // 
-            this.checkedListBoxStandard.FormattingEnabled = true;
-            this.checkedListBoxStandard.Location = new System.Drawing.Point(12, 42);
-            this.checkedListBoxStandard.Name = "checkedListBoxStandard";
-            this.checkedListBoxStandard.Size = new System.Drawing.Size(172, 319);
-            this.checkedListBoxStandard.TabIndex = 0;
+            this.checkedListBoxClassic.FormattingEnabled = true;
+            this.checkedListBoxClassic.Location = new System.Drawing.Point(12, 42);
+            this.checkedListBoxClassic.Name = "checkedListBoxClassic";
+            this.checkedListBoxClassic.Size = new System.Drawing.Size(172, 319);
+            this.checkedListBoxClassic.TabIndex = 0;
             // 
             // checkedListBoxModified
             // 
@@ -65,9 +65,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(42, 13);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(94, 13);
+            this.label1.Size = new System.Drawing.Size(84, 13);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Standard Methods";
+            this.label1.Text = "Classic Methods";
             // 
             // label2
             // 
@@ -175,7 +175,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.checkedListBoxModified);
-            this.Controls.Add(this.checkedListBoxStandard);
+            this.Controls.Add(this.checkedListBoxClassic);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -188,7 +188,7 @@
 
         #endregion
 
-        private System.Windows.Forms.CheckedListBox checkedListBoxStandard;
+        private System.Windows.Forms.CheckedListBox checkedListBoxClassic;
         private System.Windows.Forms.CheckedListBox checkedListBoxModified;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
