@@ -18,6 +18,7 @@ namespace Recearch_Pow
             ModifiedMethodsDictionary.Add("Pow_Table_1", Pow_Table_1);
             ModifiedMethodsDictionary.Add("Pow_Table_2", Pow_Table_2);
             ModifiedMethodsDictionary.Add("Pow_Table_5", Pow_Table_5);
+            ModifiedMethodsDictionary.Add("Pow_Table_6", Pow_Table_6);
             ClassicMethodsDictionary = new Dictionary<string, MethodsDelegate>();
         }
         public static Dictionary<string, MethodsDelegate> ModifiedMethodsDictionary;
@@ -143,7 +144,7 @@ namespace Recearch_Pow
             return res;
         }
 
-        private static void recompute_counters(int j, int counter)
+        private static void recompute_counters(ref int j, ref int counter)
         {
             j--;
             counter++;
@@ -396,29 +397,30 @@ namespace Recearch_Pow
                 int count_rand = numbers.Count;
                 for (int r = 0; r < count_rand; r++)
                 {
-                    List<BigInteger> work_arr = numbers.GetRange(r, count_rand - r);
-                    int j_length_work_arr = work_arr.Count - 1;
+                    BigInteger value = numbers[(int)r];
+                    BitArray value_bytes_array = int_to_byte_array(value);
+                    int j_length_work_arr = value_bytes_array.Count - 1;
                     while(j_length_work_arr >= 0)
                     {
                         int counter = -1;
-                        if (work_arr[j_length_work_arr] == 1)
+                        if (value_bytes_array[j_length_work_arr])
                         {
-                            recompute_counters(j_length_work_arr, counter);
+                            recompute_counters(ref j_length_work_arr, ref counter);
                             int tmp = j_length_work_arr;
-                            if (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 1)
+                            if (j_length_work_arr >= 0 && value_bytes_array[j_length_work_arr])
                             {
-                                while (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 1)
-                                    recompute_counters(j_length_work_arr, counter);
+                                while (j_length_work_arr != 0 && value_bytes_array[j_length_work_arr])
+                                    recompute_counters(ref j_length_work_arr, ref counter);
                                 if (counter > 0)
                                     result_1[counter - 1, 0]++;
                             }
                             else
                             {
-                                while (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 0)
-                                    recompute_counters(j_length_work_arr, counter);
-                                if (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 0)
+                                while (j_length_work_arr >= 0 && !value_bytes_array[j_length_work_arr])
+                                    recompute_counters(ref j_length_work_arr, ref counter);
+                                if (j_length_work_arr >= 0 && !value_bytes_array[j_length_work_arr])
                                 {
-                                    recompute_counters(j_length_work_arr, counter);
+                                    recompute_counters(ref j_length_work_arr, ref counter);
                                     result_2[counter, 0]++;
                                 }
                                 else
@@ -455,30 +457,31 @@ namespace Recearch_Pow
                         count_rand = numbers.Count;
                         for (int r = 0; r < count_rand; r++)
                         {
-                            List<BigInteger> work_arr = numbers.GetRange(r, count_rand - r);
-                            int j_length_work_arr = work_arr.Count - 1;
+                            BigInteger value = numbers[(int)r];
+                            BitArray value_bytes_array = int_to_byte_array(value);
+                            int j_length_work_arr = value_bytes_array.Count - 1;
                             while(j_length_work_arr >= 0)
                             {
                                 int counter = -1;
-                                if (work_arr[j_length_work_arr] == 1)
+                                if (value_bytes_array[j_length_work_arr])
                                 {
-                                    recompute_counters(j_length_work_arr, counter);
+                                    recompute_counters(ref j_length_work_arr, ref counter);
                                     int tmp = j_length_work_arr;
-                                    if (j_length_work_arr != 0 && counter < len_1 && work_arr[j_length_work_arr] == 1)
+                                    if (j_length_work_arr >= 0 && counter < len_1 && value_bytes_array[j_length_work_arr])
                                     {
-                                        while (j_length_work_arr != 0 && counter < len_1 && work_arr[j_length_work_arr] == 1)
-                                            recompute_counters(j_length_work_arr, counter);
+                                        while (j_length_work_arr >= 0 && counter < len_1 && value_bytes_array[j_length_work_arr])
+                                            recompute_counters(ref j_length_work_arr, ref counter);
                                         if (counter > 0)
                                             result_1[counter - 1, 0]++;
                                     }
-                                    else if (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 0)
+                                    else if (j_length_work_arr >= 0 && !value_bytes_array[j_length_work_arr])
                                     {
-                                        while (j_length_work_arr != 0 && counter < len_2 + 2 && work_arr[j_length_work_arr] == 0)
-                                            recompute_counters(j_length_work_arr, counter);
+                                        while (j_length_work_arr >= 0 && counter < len_2 + 2 && !value_bytes_array[j_length_work_arr])
+                                            recompute_counters(ref j_length_work_arr, ref counter);
 
-                                        if (j_length_work_arr != 0 && counter < len_2 + 2 && work_arr[j_length_work_arr] == 1)
+                                        if (j_length_work_arr >= 0 && counter < len_2 + 2 && value_bytes_array[j_length_work_arr])
                                         {
-                                            recompute_counters(j_length_work_arr, counter);
+                                            recompute_counters(ref j_length_work_arr, ref counter);
                                             result_2[counter - 2, 0]++;
                                         }
                                         else
@@ -502,6 +505,193 @@ namespace Recearch_Pow
                             iterate_array[i] = 1;
                         result_2 = Compute_third_value_with_weight(result_2, iterate_array);
                         result_2[(int)len_2, 2] = sum_of_column(result_2, 2);
+                        double count_mult = result_1[len_1, 2] + result_2[len_2, 2];
+                        count_mult -= 1 + 2 * (len_1 - 2);
+                        if (len_1 > 2 && (len_2 >= 1))
+                            count_mult++;
+
+                        if (len_2 > 0)
+                        {
+                            var tmp = len_1 - len_2;
+                            if (tmp >= 0)
+                                count_mult = count_mult - len_2;
+                            else
+                                count_mult = count_mult - 2 * (len_2 - len_1) - len_1;
+                        }
+
+                        if (count_mult > count_mult_optimal)
+                        {
+                            len_1_optimal = len_1;
+                            len_2_optimal = len_2;
+                            result_optimal_1 = result_1;
+                            result_optimal_2 = result_2;
+                            count_mult_optimal = count_mult;
+                        }
+                    }
+                }
+                print_data(result_optimal_1, (int)len_1_optimal + 1, str1, "1 2 3", "4");
+                print_data(result_optimal_2, (int)len_2_optimal + 1, str2, "1 2 3", "4");
+            }
+            return result_optimal_2;
+        }
+
+        private static double[,] Pow_Table_6(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        {
+            Console.WriteLine("Змішана таблиця #1 (11..11 та 10101..101)");
+            string str1 = "Підрахунок кількості блоків виду 11..11 (номер рядка в таблиці плюс 1 відповідає кількості одиниць у блоці). Перший елемент таблиці result_1 це 11, наступний 111 і т.д. Розглянуті всі числа довжиною" + n.ToString() + " біт";
+            string str2 = "Підрахунок кількості блоків виду 10101...101(номер рядка в таблиці плюс 2 відповідає кількості біт у блоці).Перший елемент таблиці result_2 це 101, наступний 1001 і т.д.Розглянуті всі числа довжиною" + n.ToString() + " біт";
+            int len_1_optimal = 0;
+            int len_2_optimal = 0;
+            double[,] result_optimal_1 = new double[(int)n, 3];
+            double[,] result_optimal_2 = new double[(int)n, 3];
+            fl = true;
+            if (fl)
+            {
+                double[,] result_1 = new double[(int)n, 2];
+                double[,] result_2 = new double[(int)n, 2];
+                int count_rand = numbers.Count;
+                for (int r = 0; r < count_rand; r++)
+                {
+                    BigInteger value = numbers[(int)r];
+                    BitArray value_bytes_array = int_to_byte_array(value);
+                    int j_length_work_arr = value_bytes_array.Count - 1;
+                    while (j_length_work_arr >= 0)
+                    {
+                        int counter = -1;
+                        if (value_bytes_array[j_length_work_arr])
+                        {
+                            recompute_counters(ref j_length_work_arr, ref counter);
+                            if (j_length_work_arr >= 0 && value_bytes_array[j_length_work_arr])
+                            {
+                                while (j_length_work_arr != 0 && value_bytes_array[j_length_work_arr])
+                                    recompute_counters(ref j_length_work_arr, ref counter);
+                                if (counter > 0)
+                                    result_1[counter - 1, 0]++;
+                            }
+                            else
+                            {
+                                fl = true;
+                                bool fl_break = true;
+                                while (fl_break)
+                                {
+                                    if (fl)
+                                    {
+                                        if (j_length_work_arr >= 0 && !value_bytes_array[j_length_work_arr])
+                                        {
+                                            j_length_work_arr--;
+                                            fl = !fl;
+                                        }
+                                        else
+                                            fl_break = !fl_break;
+                                    }
+                                    else
+                                    {
+                                        if (j_length_work_arr >= 0 && value_bytes_array[j_length_work_arr])
+                                        {
+                                            recompute_counters(ref j_length_work_arr, ref counter);
+                                            fl = !fl;
+                                        }
+                                        else
+                                            fl_break = !fl_break;
+                                    }
+                                }
+                                if (counter > 0)
+                                    result_2[counter - 1, 0]++;
+                                
+                            }
+                        }
+                        else
+                            j_length_work_arr--;
+                    }
+                }
+
+                result_1 = Compute_second_value(result_1, (int)count_rand);
+                result_2 = Compute_second_value(result_2, (int)count_rand);
+                print_data(result_1, (int)n, str1, "1 2", "4");
+                print_data(result_2, (int)n, str2, "1 2", "4");
+
+                BigInteger max_length = length;
+                double count_mult_optimal = -100000;
+
+                for (length = 2; length < max_length; length++)
+                {
+                    for (int h = 0; h < length; h++)
+                    {
+                        int len_1 = h;
+                        int len_2 = (int)length - h;
+                        str1 = "Підрахунок кількості блоків виду 11..11 з обмеженою довжиною вікна. Максимально можлива довжина вікна " + length.ToString() + " біт.Кількість елементів таблиці ', sim2str(len),'.Розглянуті всі числа довжиною " + n.ToString() + " біт";
+                        str2 = "Підрахунок кількості блоків виду 10101...101 з обмеженою довжиною вікна. Максимально можлива довжина вікна " + length.ToString() + " біт. Кількість елементів таблиці ', sim2str(len), '. Розглянуті всі числа довжиною " + n.ToString() + " біт";
+                        result_1 = new double[len_1 + 1, 3];
+                        result_2 = new double[len_2 + 1, 3];
+
+                        count_rand = numbers.Count;
+                        for (int r = 0; r < count_rand; r++)
+                        {
+                            BigInteger value = numbers[(int)r];
+                            BitArray value_bytes_array = int_to_byte_array(value);
+                            int j_length_work_arr = value_bytes_array.Count - 1;
+                            while (j_length_work_arr >= 0)
+                            {
+                                int counter = -1;
+                                if (value_bytes_array[j_length_work_arr])
+                                {
+                                    recompute_counters(ref j_length_work_arr, ref counter);
+                                    int tmp = j_length_work_arr;
+                                    if (j_length_work_arr >= 0 && counter < len_1 && value_bytes_array[j_length_work_arr])
+                                    {
+                                        while (j_length_work_arr >= 0 && counter < len_1 && value_bytes_array[j_length_work_arr])
+                                            recompute_counters(ref j_length_work_arr, ref counter);
+                                        if (counter > 0)
+                                            result_1[counter - 1, 0]++;
+                                    }
+                                    else
+                                    {
+                                        fl = true;
+                                        bool fl_break = true;
+                                        while (fl_break && counter < len_2)
+                                        {
+                                            if (fl)
+                                            {
+                                                if (j_length_work_arr >= 0 && value_bytes_array[j_length_work_arr])
+                                                {
+                                                    j_length_work_arr--;
+                                                    fl = !fl;
+                                                }
+                                                else
+                                                    fl_break = !fl_break;
+                                            }
+                                            else
+                                            {
+                                                if (j_length_work_arr >= 0 && value_bytes_array[j_length_work_arr])
+                                                {
+                                                    recompute_counters(ref j_length_work_arr, ref counter);
+                                                    fl = !fl;
+                                                }
+                                                else
+                                                    fl_break = !fl_break;
+                                            }
+                                        }
+                                        if (counter > 0)
+                                            result_2[counter - 1, 0]++;
+                                    }
+                                }
+                                else
+                                    j_length_work_arr--;
+                            }
+                        }
+                        result_1 = Compute_second_value(result_1, (int)count_rand);
+                        double[] iterate_array = new double[(int)len_1 + 1];
+                        for (var i = 0; i < len_1 + 1; i++)
+                            iterate_array[i] = i + 1;
+                        result_1 = Compute_third_value_with_weight(result_1, iterate_array);
+                        result_1[(int)len_1, 2] = sum_of_column(result_1, 2);
+
+                        iterate_array = new double[len_2 + 1];
+                        result_2 = Compute_second_value(result_2, count_rand);
+                        for (var i = 0; i < len_2; i++)
+                            iterate_array[i] = 1;
+                        result_2 = Compute_third_value_with_weight(result_2, iterate_array);
+                        result_2[len_2, 2] = sum_of_column(result_2, 2);
                         double count_mult = result_1[len_1, 2] + result_2[len_2, 2];
                         count_mult -= 1 + 2 * (len_1 - 2);
                         if (len_1 > 2 && (len_2 >= 1))
