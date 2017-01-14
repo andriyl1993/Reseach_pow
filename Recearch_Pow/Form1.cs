@@ -20,11 +20,18 @@ namespace Recearch_Pow
                 checkedListBoxModified.Items.Add(method.Key, true);
 
             foreach (var method in Methods.ClassicMethodsDictionary)
-                checkedListBoxModified.Items.Add(method.Key, true);
+                checkedListBoxClassic.Items.Add(method.Key, true);
         }
 
         private void buttonStart_Click(object sender, EventArgs e)
         {
+            object[,] array =
+            {
+                {1, 2, 3 },
+                {4, 5, 6 }
+            };
+            Output.WriteToExcel("excel.xls", "sheet1", array, 6, 0);
+            Output.WriteToExcel("excel.xls", "sheet2", array, 1, 0);
             BigInteger length, n;
             BigInteger.TryParse(textBoxLength.Text, out length);
             BigInteger.TryParse(textBoxBits.Text, out n);
@@ -44,11 +51,15 @@ namespace Recearch_Pow
                     numbers.Add(r.Next() % max_number);
             }
 
+            List<double[,]> results = new List<double[,]>();
+
             for (int i = 0; i < checkedListBoxModified.Items.Count; i++)
             {
                 if (checkedListBoxModified.GetItemChecked(i))
-                    Methods.ModifiedMethodsDictionary[checkedListBoxModified.Items[i].ToString()](length, n, numbers, isRand);
+                    results.Add(Methods.ModifiedMethodsDictionary[checkedListBoxModified.Items[i].ToString()](length, n, numbers, isRand));
             }
+
+            Console.Write(results);
         }
     }
 }

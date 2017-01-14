@@ -28,8 +28,6 @@ namespace Recearch_Pow
         public static double[,] FunPrimeNumbers(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
         {
             BigInteger max_len = length;
-
-
             int count_mult_optimal = -100000;
 
             for (BigInteger len = 2; len <= max_len; len++)
