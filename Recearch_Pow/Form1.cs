@@ -16,8 +16,15 @@ namespace Recearch_Pow
         public Form1()
         {
             InitializeComponent();
+            int i = 0;
             foreach (var method in Methods.ModifiedMethodsDictionary)
-                checkedListBoxModified.Items.Add(method.Key, true);
+            {
+                if (i == Methods.ModifiedMethodsDictionary.Count - 1)
+                    checkedListBoxModified.Items.Add(method.Key, true);
+                else
+                    checkedListBoxModified.Items.Add(method.Key, false);
+                i++;
+            }
 
             foreach (var method in Methods.ClassicMethodsDictionary)
                 checkedListBoxClassic.Items.Add(method.Key, true);
