@@ -16,6 +16,7 @@ namespace Recearch_Pow
             ModifiedMethodsDictionary.Add("Prime numbers", FunPrimeNumbers);
             ModifiedMethodsDictionary.Add("Pow_Table_0", Pow_Table_0);
             ModifiedMethodsDictionary.Add("Pow_Table_1", Pow_Table_1);
+            ModifiedMethodsDictionary.Add("Pow_Table_2", Pow_Table_2);
 
             ClassicMethodsDictionary = new Dictionary<string, MethodsDelegate>();
         }
@@ -204,7 +205,6 @@ namespace Recearch_Pow
             
             result_2 = Compute_second_value(result_2, (int)count_rand, (int)length + 1);
 
-            // !!!!! Питання стосовно множення на 0
             // в середньому на скільки операцій множення буде менше
             var _tmp_arr = new double[(int)length + 1]; 
             for (int i = 0; i < length + 1; i++)
@@ -274,6 +274,91 @@ namespace Recearch_Pow
             Console.WriteLine("2 - середня кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2, що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
             Console.WriteLine("3 - в середньому на скільки операцій множення буде менше");
             return result_1;
+        }
+
+        private static double[,] Pow_Table_2(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
+        {
+            BigInteger len_optimal = 0;
+            var result_optimal = new double[(int)length + 1, 3];
+            string str1 = "Підрахунок кількості блоків виду 11..11 (значення номеру рядка в таблиці плюс 1 відповідає кількості одиниць у блоці). Перший елемент таблиці 11, другий 111 і т.д. Розглянуті всі числа довжиною" + n.ToString() + " біт";
+            double[,] result_1 = new double[(int)n, 2];
+            int count_rand = numbers.Count;
+            for (var r = 0; r < count_rand; r++)
+            {
+                BigInteger value = numbers[r];
+                BitArray bit_value = int_to_byte_array(value);
+                int j_length_t = bit_value.Length - 1;
+                while (j_length_t > 0)
+                {
+                    int counter = -1;
+                    if (bit_value[j_length_t])
+                    {
+                        while (j_length_t != 0 && bit_value[j_length_t])
+                        {
+                            j_length_t--;
+                            counter++;
+                        }
+                        if (counter > 0)
+                            result_1[counter - 1, 0]++;
+                    }
+                    else
+                        j_length_t--;
+                }
+            }
+            result_1 = Compute_second_value(result_1, (int)count_rand, (int)length + 1);
+            BigInteger[] arr = Enumerable.Range(1, (int)length + 1).Select(x => (BigInteger)x).ToArray();
+            // printmatVarCols(result_2, str_2, string.Join("", arr),   '1 2', 4);
+            Console.WriteLine("1 - кількість блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1)");
+            Console.WriteLine("2 - середня блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1), що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
+
+
+            string str2 = "Підрахунок кількості блоків виду 11..11 з обмеженою довжиною вікна. Максимально можлива довжина вікна ', sim2str(len), ' біт. Кількість елементів таблиці " + length.ToString() + ". Розглянуті всі числа довжиною " + n.ToString() + " біт";
+            BigInteger max_length = length;
+            int count_mult_optimal = -100000;
+
+            for (length = 2; length < max_length; length++)
+            {
+                double[,] result_2 = new double[(int)length + 1, 3];
+                count_rand = numbers.Count;
+                for (int r = 0; r < count_rand; r++)
+                {
+                    BitArray bit_value = int_to_byte_array(numbers[r]);
+                    int j_length_values = bit_value.Length - 1;
+                    while (j_length_values > 0)
+                    {
+                        int counter = -1;
+                        if (bit_value[j_length_values])
+                        {
+                            while (j_length_values != 0 && counter < length && bit_value[j_length_values])
+                            {
+                                j_length_values--;
+                                counter++;
+                            }
+                            if (counter > 0)
+                                result_2[counter - 1, 0]++;
+                        }
+                        else
+                            j_length_values--;
+                    }
+                }
+                result_2 = Compute_second_value(result_2, (int)count_rand, (int)length + 1);
+                double[] iterate_array = new double[(int)length + 1];
+                for (var i = 0; i < (int)length + 1; i++)
+                    iterate_array[i] = i+1;
+                result_2 = Compute_third_value_with_weight(result_2, iterate_array);
+                result_2[(int)length, 2] = sum_of_column(result_2, 2);
+                double count_mult = result_2[(int)length, 2] - 2 * (double)length;
+
+                if (count_mult > count_mult_optimal)
+                {
+                    len_optimal = length;
+                    result_optimal = result_2;
+                    count_mult_optimal = (int)count_mult;
+                }
+            }
+            arr = Enumerable.Range(1, (int)len_optimal + 1).Select(x => (BigInteger)x).ToArray();
+            //printmatVarCols(result_optimal, str_2, string.Join("", arr), '1 2 3', 4);
+            return result_optimal;
         }
 
         private static int[] list_prime = {
