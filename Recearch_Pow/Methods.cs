@@ -13,7 +13,7 @@ namespace Recearch_Pow
         static Methods()
         {
             ModifiedMethodsDictionary = new Dictionary<string, MethodsDelegate>();
-            ModifiedMethodsDictionary.Add("Prime numbers", FunPrimeNumbers);
+            //ModifiedMethodsDictionary.Add("Prime numbers", FunPrimeNumbers);
             ModifiedMethodsDictionary.Add("Pow_Table_0", Pow_Table_0);
             ModifiedMethodsDictionary.Add("Pow_Table_1", Pow_Table_1);
             ModifiedMethodsDictionary.Add("Pow_Table_2", Pow_Table_2);
