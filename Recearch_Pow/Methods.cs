@@ -17,7 +17,7 @@ namespace Recearch_Pow
             ModifiedMethodsDictionary.Add("Pow_Table_0", Pow_Table_0);
             ModifiedMethodsDictionary.Add("Pow_Table_1", Pow_Table_1);
             ModifiedMethodsDictionary.Add("Pow_Table_2", Pow_Table_2);
-
+            ModifiedMethodsDictionary.Add("Pow_Table_5", Pow_Table_5);
             ClassicMethodsDictionary = new Dictionary<string, MethodsDelegate>();
         }
         public static Dictionary<string, MethodsDelegate> ModifiedMethodsDictionary;
@@ -90,15 +90,24 @@ namespace Recearch_Pow
 
         private static BigInteger bytes_to_int(BitArray bits, int from, int to)
         {
-            int numBytes = bits.Count / 8;
+            int arr_length = to - from;
+            int _l = 0;
+            if (arr_length > 0)
+                _l = arr_length / 8;
+            int _add = (_l + 1) * 8 - (to - from);
+            var new_bits = new bool[to - from + _add];
+            for (int i = 0; i < to - from; i++)
+                new_bits[_add + i] = bits[from + i];
+
+            int numBytes = new_bits.Length / 8;
             if (bits.Count % 8 != 0) numBytes++;
 
             byte[] bytes = new byte[numBytes];
             int byteIndex = 0, bitIndex = 0;
 
-            for (int i = 0; i < bits.Count; i++)
+            for (int i = 0; i < new_bits.Length; i++)
             {
-                if (bits[i])
+                if (new_bits[i])
                     bytes[byteIndex] |= (byte)(1 << (7 - bitIndex));
 
                 bitIndex++;
@@ -112,9 +121,9 @@ namespace Recearch_Pow
             return new BigInteger(bytes);
         }
 
-        private static double[,] Compute_second_value(double[,] arr, int count_rand, int length)
+        private static double[,] Compute_second_value(double[,] arr, int count_rand)
         {
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < arr.GetLength(0); i++)
                 arr[i, 1] = Math.Round(arr[i, 0] / count_rand, 5);
             return arr;
         }
@@ -134,9 +143,21 @@ namespace Recearch_Pow
             return res;
         }
 
+        private static void recompute_counters(int j, int counter)
+        {
+            j--;
+            counter++;
+        }
+
+        private static void print_data(double[,] result, int length, string str, string digit_row1, string digit_row_2)
+        {
+            BigInteger[] arr = Enumerable.Range(1, length).Select(x => (BigInteger)x).ToArray();
+            //printmatVarCols(result_optimal, str, string.Join("", arr), digit_row1, digit_row_2);
+        }
+
         private static double[,] Pow_Table_0(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
         {
-            String str_1 = "Підрахунок кількості блоків виду 10..00 (номер рядка в таблиці відповідає кількості біт у блоці). Перший елемент таблиці 1, другий 10 і т.д. Розглянуті всі числа довжиною";
+            string str_1 = "Підрахунок кількості блоків виду 10..00 (номер рядка в таблиці відповідає кількості біт у блоці). Перший елемент таблиці 1, другий 10 і т.д. Розглянуті всі числа довжиною";
             double[,] result_1 = new double[(int)n, 2];
             BigInteger count_rand = numbers.Count;
             for (BigInteger r = 0; r < count_rand; r++)
@@ -165,9 +186,8 @@ namespace Recearch_Pow
                         index -= 1;
                 }
             }
-            result_1 = Compute_second_value(result_1, (int)count_rand, (int)n);
-            BigInteger[] arr = Enumerable.Range(1, (int)n).Select(x => (BigInteger)x).ToArray();
-            // printmatVarCols(result_1, str_1, string.Join("", arr),   '1 2', 4);
+            result_1 = Compute_second_value(result_1, (int)count_rand);
+            print_data(result_1, (int)length, str_1, "1 2", "4");
             Console.WriteLine("1 - кількість блоків виду 10..00(довжина блоку дорівнює номеру рядка таблиці)");
             Console.WriteLine("2 - середня блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці), що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
             Console.WriteLine();
@@ -203,7 +223,7 @@ namespace Recearch_Pow
                 }
             }
             
-            result_2 = Compute_second_value(result_2, (int)count_rand, (int)length + 1);
+            result_2 = Compute_second_value(result_2, (int)count_rand);
 
             // в середньому на скільки операцій множення буде менше
             var _tmp_arr = new double[(int)length + 1]; 
@@ -214,8 +234,8 @@ namespace Recearch_Pow
             }
             result_2[(int)length, 2] = _tmp_arr.Sum();
             double count_mult = result_2[(int)length, 2];
-            arr = Enumerable.Range(1, (int)length+1).Select(x => (BigInteger)x).ToArray();
-            // printmatVarCols(result_2, str_2, string.Join("", arr),   '1 2 3', 4);
+
+            print_data(result_2, (int)length + 1, str_2, "1 2 3", "4");
             Console.WriteLine("1 - кількість блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці) в усіх числах довжини" + n.ToString() + " біт");
             Console.WriteLine("2 - середня кількість блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці), що зустрічається у одному числі, що має довжину" + n.ToString() + " біт");
             Console.WriteLine("3 - в середньому на скільки операцій множення буде менше");
@@ -227,7 +247,7 @@ namespace Recearch_Pow
         private static double[,] Pow_Table_1(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
         {
             double log2_length = Math.Log((int)length + 1, 2) + 2;
-            String str1 = "Підрахунок кількості блоків для модифікованої класичної таблиці передобчислень #2 (на початку дві одиниці  замість однієї). Довжина вікна " + log2_length.ToString();
+            string str1 = "Підрахунок кількості блоків для модифікованої класичної таблиці передобчислень #2 (на початку дві одиниці  замість однієї). Довжина вікна " + log2_length.ToString();
             str1 += " біт. Кількість елементів таблиці " + length.ToString();
             str1 += ". Розглянуті всі числа довжиною " + n.ToString() + " біт";
             double[,] result_1 = new double[(int)length + 1, 3];
@@ -264,12 +284,11 @@ namespace Recearch_Pow
                 weight[i] = ones_sum + 1;
             }
             
-            result_1 = Compute_second_value(result_1, (int)count_rand, (int)length + 1);
+            result_1 = Compute_second_value(result_1, (int)count_rand);
             result_1 = Compute_third_value_with_weight(result_1, weight);
             result_1[(int)length, 2] = sum_of_column(result_1, 2);
             double count_mult = result_1[(int)length, 2];
-            BigInteger[] arr = Enumerable.Range(1, (int)length + 1).Select(x => (BigInteger)x).ToArray();
-            // printmatVarCols(result_1, str_1, string.Join("", arr), '1 2 3', 4);
+            print_data(result_1, (int)length + 1, str1, "1 2 3", "4");
             Console.WriteLine("1 - кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2");
             Console.WriteLine("2 - середня кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2, що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
             Console.WriteLine("3 - в середньому на скільки операцій множення буде менше");
@@ -305,9 +324,8 @@ namespace Recearch_Pow
                         j_length_t--;
                 }
             }
-            result_1 = Compute_second_value(result_1, (int)count_rand, (int)length + 1);
-            BigInteger[] arr = Enumerable.Range(1, (int)length + 1).Select(x => (BigInteger)x).ToArray();
-            // printmatVarCols(result_2, str_2, string.Join("", arr),   '1 2', 4);
+            result_1 = Compute_second_value(result_1, (int)count_rand);
+            print_data(result_1, (int)length + 1, str1, "1 2", "4");
             Console.WriteLine("1 - кількість блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1)");
             Console.WriteLine("2 - середня блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1), що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
 
@@ -341,7 +359,7 @@ namespace Recearch_Pow
                             j_length_values--;
                     }
                 }
-                result_2 = Compute_second_value(result_2, (int)count_rand, (int)length + 1);
+                result_2 = Compute_second_value(result_2, (int)count_rand);
                 double[] iterate_array = new double[(int)length + 1];
                 for (var i = 0; i < (int)length + 1; i++)
                     iterate_array[i] = i+1;
@@ -355,10 +373,163 @@ namespace Recearch_Pow
                     result_optimal = result_2;
                     count_mult_optimal = (int)count_mult;
                 }
+
+                print_data(result_optimal, (int)len_optimal + 1, str2, "1 2 3", "4");
             }
-            arr = Enumerable.Range(1, (int)len_optimal + 1).Select(x => (BigInteger)x).ToArray();
-            //printmatVarCols(result_optimal, str_2, string.Join("", arr), '1 2 3', 4);
             return result_optimal;
+        }
+
+        private static double[,] Pow_Table_5(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        {
+            Console.WriteLine("Змішана таблиця #1 (11..11 та 10..01)");
+            string str1 = "Підрахунок кількості блоків виду 11..11 (номер рядка в таблиці плюс 1 відповідає кількості одиниць у блоці). Перший елемент таблиці result_1 це 11, наступний 111 і т.д. Розглянуті всі числа довжиною" + n.ToString() + " біт";
+            string str2 = "Підрахунок кількості блоків виду 10..01(номер рядка в таблиці плюс 2 відповідає кількості біт у блоці).Перший елемент таблиці result_2 це 101, наступний 1001 і т.д.Розглянуті всі числа довжиною" + n.ToString() + " біт";
+            int len_1_optimal = 0;
+            int len_2_optimal = 0;
+            double[,] result_optimal_1 = new double[(int)n, 3];
+            double[,] result_optimal_2 = new double[(int)n, 3];
+            fl = true;
+            if (fl)
+            {
+                double[,] result_1 = new double[(int)n, 2];
+                double[,] result_2 = new double[(int)n, 2];
+                int count_rand = numbers.Count;
+                for (int r = 0; r < count_rand; r++)
+                {
+                    List<BigInteger> work_arr = numbers.GetRange(r, count_rand - r);
+                    int j_length_work_arr = work_arr.Count - 1;
+                    while(j_length_work_arr >= 0)
+                    {
+                        int counter = -1;
+                        if (work_arr[j_length_work_arr] == 1)
+                        {
+                            recompute_counters(j_length_work_arr, counter);
+                            int tmp = j_length_work_arr;
+                            if (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 1)
+                            {
+                                while (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 1)
+                                    recompute_counters(j_length_work_arr, counter);
+                                if (counter > 0)
+                                    result_1[counter - 1, 0]++;
+                            }
+                            else
+                            {
+                                while (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 0)
+                                    recompute_counters(j_length_work_arr, counter);
+                                if (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 0)
+                                {
+                                    recompute_counters(j_length_work_arr, counter);
+                                    result_2[counter, 0]++;
+                                }
+                                else
+                                {
+                                    j_length_work_arr = tmp;
+                                    result_1[0, 0]++;
+                                }
+                            }
+                        }
+                        else
+                            j_length_work_arr--;
+                    }
+                }
+
+                result_1 = Compute_second_value(result_1, (int)count_rand);
+                result_2 = Compute_second_value(result_2, (int)count_rand);
+                print_data(result_1, (int)n, str1, "1 2", "4");
+                print_data(result_2, (int)n, str2, "1 2", "4");
+
+                BigInteger max_length = length;
+                double count_mult_optimal = -100000;
+
+                for (length = 2; length < max_length; length++)
+                {
+                    for (int h = 0; h < length; h++)
+                    {
+                        int len_1 = h;
+                        int len_2 = (int)length - h;
+                        str1 = "Підрахунок кількості блоків виду 11..11 з обмеженою довжиною вікна. Максимально можлива довжина вікна " + length.ToString() + " біт.Кількість елементів таблиці ', sim2str(len),'.Розглянуті всі числа довжиною " + n.ToString() + " біт";
+                        str2 = "Підрахунок кількості блоків виду 10..01 з обмеженою довжиною вікна. Максимально можлива довжина вікна " + length.ToString() + " біт. Кількість елементів таблиці ', sim2str(len), '. Розглянуті всі числа довжиною " + n.ToString() + " біт";
+                        result_1 = new double[len_1 + 1, 3];
+                        result_2 = new double[len_2 + 1, 3];
+
+                        count_rand = numbers.Count;
+                        for (int r = 0; r < count_rand; r++)
+                        {
+                            List<BigInteger> work_arr = numbers.GetRange(r, count_rand - r);
+                            int j_length_work_arr = work_arr.Count - 1;
+                            while(j_length_work_arr >= 0)
+                            {
+                                int counter = -1;
+                                if (work_arr[j_length_work_arr] == 1)
+                                {
+                                    recompute_counters(j_length_work_arr, counter);
+                                    int tmp = j_length_work_arr;
+                                    if (j_length_work_arr != 0 && counter < len_1 && work_arr[j_length_work_arr] == 1)
+                                    {
+                                        while (j_length_work_arr != 0 && counter < len_1 && work_arr[j_length_work_arr] == 1)
+                                            recompute_counters(j_length_work_arr, counter);
+                                        if (counter > 0)
+                                            result_1[counter - 1, 0]++;
+                                    }
+                                    else if (j_length_work_arr != 0 && work_arr[j_length_work_arr] == 0)
+                                    {
+                                        while (j_length_work_arr != 0 && counter < len_2 + 2 && work_arr[j_length_work_arr] == 0)
+                                            recompute_counters(j_length_work_arr, counter);
+
+                                        if (j_length_work_arr != 0 && counter < len_2 + 2 && work_arr[j_length_work_arr] == 1)
+                                        {
+                                            recompute_counters(j_length_work_arr, counter);
+                                            result_2[counter - 2, 0]++;
+                                        }
+                                        else
+                                            j_length_work_arr = tmp;
+                                    }
+                                }
+                                else
+                                    j_length_work_arr--;
+                            }
+                        }
+                        result_1 = Compute_second_value(result_1, (int)count_rand);
+                        double[] iterate_array = new double[(int)len_1 + 1];
+                        for (var i = 0; i < (int)len_1; i++)
+                            iterate_array[i] = i + 1;
+                        result_1 = Compute_third_value_with_weight(result_1, iterate_array);
+                        result_1[(int)len_1, 2] = sum_of_column(result_1, 2);
+
+                        iterate_array = new double[(int)len_2 + 1];
+                        result_2 = Compute_second_value(result_2, (int)count_rand);
+                        for (var i = 0; i < (int)len_2; i++)
+                            iterate_array[i] = 1;
+                        result_2 = Compute_third_value_with_weight(result_2, iterate_array);
+                        result_2[(int)len_2, 2] = sum_of_column(result_2, 2);
+                        double count_mult = result_1[len_1, 2] + result_2[len_2, 2];
+                        count_mult -= 1 + 2 * (len_1 - 2);
+                        if (len_1 > 2 && (len_2 >= 1))
+                            count_mult++;
+
+                        if (len_2 > 0)
+                        {
+                            var tmp = len_1 - len_2;
+                            if (tmp >= 0)
+                                count_mult = count_mult - len_2;
+                            else
+                                count_mult = count_mult - 2 * (len_2 - len_1) - len_1;
+                        }
+
+                        if (count_mult > count_mult_optimal)
+                        {
+                            len_1_optimal = len_1;
+                            len_2_optimal = len_2;
+                            result_optimal_1 = result_1;
+                            result_optimal_2 = result_2;
+                            count_mult_optimal = count_mult;
+                        }
+                    }
+                }
+                print_data(result_optimal_1, (int)len_1_optimal + 1, str1, "1 2 3", "4");
+                print_data(result_optimal_2, (int)len_2_optimal + 1, str2, "1 2 3", "4");
+            }
+            return result_optimal_2;
         }
 
         private static int[] list_prime = {
