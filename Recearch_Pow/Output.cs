@@ -67,10 +67,13 @@ namespace Recearch_Pow
             if (worksheetIndex < 0)
                 worksheet = new Worksheet(sheetName);
 
-            for (int i = 0; i < array.GetLength(0); i++)
-                for (int j = 0; j < array.GetLength(1); j++)
-                    worksheet.Cells[firstRow + i, firstCol + j] = new Cell(array[i, j]);
-
+            if (array != null)
+            {
+                for (int i = 0; i < array.GetLength(0); i++)
+                    for (int j = 0; j < array.GetLength(1); j++)
+                        worksheet.Cells[firstRow + i, firstCol + j] = new Cell(array[i, j]);
+            }
+            
             // worksheet.Cells[0, 1] = new Cell((short)1);
             // worksheet.Cells[2, 0] = new Cell(9999999);
             // worksheet.Cells[3, 3] = new Cell((decimal)3.45);
@@ -98,21 +101,43 @@ namespace Recearch_Pow
             //     Cell cell = row.GetCell(colIndex);
         }
 
-        static public void WriteMethodsResult(string filename, int length, int n, Dictionary<string, double[,]> results)
+        static public void WriteMethodsResult(string filename, int length, int n, Dictionary<string, double[,]> results, Dictionary<string, List<object>> commentsDictionary, Dictionary<string, double> sumDictionary)
         {
             foreach (var dict in results)
             {
-                double[,] result = dict.Value;
-                object[,] arr = new object[result.GetLength(0) + 1, result.GetLength(1)];
+                List<object> comments = null;
+                commentsDictionary.TryGetValue(dict.Key, out comments);
 
-                arr[0, 0] = dict.Key;
+                int row = 0;
+                int count = comments.Count;
+                rowsUsed.TryGetValue(filename + " " + dict.Key, out row);
+
+                double[,] result = dict.Value;
+                object[,] arr = new object[result.GetLength(0) + 4 + count, result.GetLength(1) + 1];
+
+                arr[0, 0] = dict.Key + ", length = " + length + ", n = " + n;
+
+                for (int i = 0; i < count; i++)
+                    arr[i + 1, 0] = comments[i];
+
+                for (int i = 1; i <= result.GetLength(0); i++)
+                    arr[i + count + 1, 0] = i;
+
+                for (int j = 1; j <= result.GetLength(1); j++)
+                    arr[count + 1, j] = j;
 
                 for (int i = 0; i < result.GetLength(0); i++)
                     for (int j = 0; j < result.GetLength(1); j++)
-                        arr[i + 1, j] = result[i, j];
+                        arr[i + count + 2, j + 1] = result[i, j];
 
-                WriteToExcel(filename, dict.Key + " len:" + length + " n:" + n, arr);
+                arr[result.GetLength(0) + count + 2, result.GetLength(1) - 1] = "Сума:";
+                arr[result.GetLength(0) + count + 2, result.GetLength(1)] = sumDictionary[dict.Key];
+
+                rowsUsed[filename + " " + dict.Key] = row + arr.GetLength(0) + 2;
+                WriteToExcel(filename, dict.Key, arr, row);
             }
         }
+
+        static Dictionary<string, int> rowsUsed = new Dictionary<string, int>();
     }
 }

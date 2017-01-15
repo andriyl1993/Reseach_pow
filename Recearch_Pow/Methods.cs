@@ -13,10 +13,13 @@ namespace Recearch_Pow
         static Methods()
         {
             ModifiedMethodsDictionary = new Dictionary<string, MethodsDelegate>();
+            ClassicMethodsDictionary = new Dictionary<string, MethodsDelegate>();
+
+
             //ModifiedMethodsDictionary.Add("Prime numbers", FunPrimeNumbers);
-            ModifiedMethodsDictionary.Add("Pow_Table_0", Pow_Table_0);
-            ModifiedMethodsDictionary.Add("Pow_Table_1", Pow_Table_1);
-            ModifiedMethodsDictionary.Add("Pow_Table_2", Pow_Table_2);
+            ClassicMethodsDictionary.Add("Pow_Table_0", Pow_Table_0);
+            ClassicMethodsDictionary.Add("Pow_Table_1", Pow_Table_1);
+            ClassicMethodsDictionary.Add("Pow_Table_2", Pow_Table_2);
             ModifiedMethodsDictionary.Add("Pow_Table_5", Pow_Table_5);
             ModifiedMethodsDictionary.Add("Pow_Table_6", Pow_Table_6);
             ModifiedMethodsDictionary.Add("Pow_Table_7", Pow_Table_7);
@@ -29,15 +32,15 @@ namespace Recearch_Pow
             ModifiedMethodsDictionary.Add("Pow_Table_14", Pow_Table_14);
             ModifiedMethodsDictionary.Add("Pow_Table_15", Pow_Table_15);
             ModifiedMethodsDictionary.Add("Pow_Table_16", Pow_Table_16);
-            ClassicMethodsDictionary = new Dictionary<string, MethodsDelegate>();
         }
         public static Dictionary<string, MethodsDelegate> ModifiedMethodsDictionary;
         public static Dictionary<string, MethodsDelegate> ClassicMethodsDictionary;
 
-        public delegate double[,] MethodsDelegate(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false);
+        public delegate double[,] MethodsDelegate(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false);
+        
+        public static double[,] FunPrimeNumbers(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
+        {comments = new List<object>();
 
-        public static double[,] FunPrimeNumbers(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
-        {
             BigInteger max_len = length;
             int count_mult_optimal = -100000;
 
@@ -45,7 +48,7 @@ namespace Recearch_Pow
             {
                 int formula = list_prime[(int)len];
                 int log2_len = (int)Math.Ceiling(Math.Log(formula));
-                string str_1 = "Нова таблиця #8 (прості числа). Розглянуті всі числа довжиною " + n + " біт";
+                comments.Add("Нова таблиця #8 (прості числа). Розглянуті всі числа довжиною " + n + " біт");
 
                 int[,] result_1 = new int[(int)len + 1, 2];
                 for (BigInteger len_2 = 1; len_2 <= len; len_2++)
@@ -55,7 +58,6 @@ namespace Recearch_Pow
                     for (int r = 0; r < count_rand; r++)
                     {
                         byte[] t = numbers[r].ToByteArray();
-
 
                         for (int j = t.Length - 1; j >= 0; j--)
                         {
@@ -142,7 +144,7 @@ namespace Recearch_Pow
         private static double[,] Compute_third_value_with_weight(double[,] arr, double[] weights)
         {
             for (int i = 0; i < weights.Length; i++)
-                arr[i, 2] = Math.Round(arr[i, 0] * weights[i], 5);
+                arr[i, 2] = Math.Round(arr[i, 1] * weights[i], 5);
             return arr;
         }
 
@@ -164,7 +166,7 @@ namespace Recearch_Pow
             return weight;
         }
 
-        private static double sum_of_column(double[,] arr, int column)
+        public static double sum_of_column(double[,] arr, int column)
         {
             double res = 0;
             for (var i = 0; i < arr.GetLength(0); i++)
@@ -184,9 +186,10 @@ namespace Recearch_Pow
             //printmatVarCols(result_optimal, str, string.Join("", arr), digit_row1, digit_row_2);
         }
 
-        private static double[,] Pow_Table_0(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
+        private static double[,] Pow_Table_0(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
-            string str_1 = "Підрахунок кількості блоків виду 10..00 (номер рядка в таблиці відповідає кількості біт у блоці). Перший елемент таблиці 1, другий 10 і т.д. Розглянуті всі числа довжиною";
+            comments = new List<object>();
+            comments.Add("Підрахунок кількості блоків виду 10..00 (номер рядка в таблиці відповідає кількості біт у блоці). Перший елемент таблиці 1, другий 10 і т.д. Розглянуті всі числа довжиною");
             double[,] result_1 = new double[(int)n, 2];
             BigInteger count_rand = numbers.Count;
             for (BigInteger r = 0; r < count_rand; r++)
@@ -216,14 +219,12 @@ namespace Recearch_Pow
                 }
             }
             result_1 = Compute_second_value(result_1, (int)count_rand);
-            print_data(result_1, (int)length, str_1, "1 2", "4");
-            Console.WriteLine("1 - кількість блоків виду 10..00(довжина блоку дорівнює номеру рядка таблиці)");
-            Console.WriteLine("2 - середня блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці), що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
-            Console.WriteLine();
-            Console.WriteLine();
+            
+            comments.Add("1 - кількість блоків виду 10..00(довжина блоку дорівнює номеру рядка таблиці)");
+            comments.Add("2 - середня блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці), що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
 
             // second part
-            String str_2 = "Підрахунок кількості блоків виду 10..00 з обмеженою довжиною вікна. Максимально можлива довжина вікна ', sim2str(len), ' біт.Кількість елементів таблиці " + length.ToString() + ".Розглянуті всі числа довжиною " + n.ToString() + " біт";
+            comments.Add("Підрахунок кількості блоків виду 10..00 з обмеженою довжиною вікна. Максимально можлива довжина вікна ', sim2str(len), ' біт.Кількість елементів таблиці " + length.ToString() + ".Розглянуті всі числа довжиною " + n.ToString() + " біт");
 
             double[,] result_2 = new double[(int)length + 1, 3];
             count_rand = numbers.Count;
@@ -253,32 +254,35 @@ namespace Recearch_Pow
             }
 
             result_2 = Compute_second_value(result_2, (int)count_rand);
+            double[] weights = compute_weights((int)length + 1);
+            result_2 = Compute_third_value_with_weight(result_2, weights);
 
             // в середньому на скільки операцій множення буде менше
-            var _tmp_arr = new double[(int)length + 1];
-            for (int i = 0; i < length + 1; i++)
-            {
-                result_2[i, 2] = Math.Round(result_2[i, 1] * 0, 5);
-                _tmp_arr[i] = result_2[i, 2] / ((double)length - 1);
-            }
-            result_2[(int)length, 2] = _tmp_arr.Sum();
-            double count_mult = result_2[(int)length, 2];
+            //var _tmp_arr = new double[(int)length + 1];
+            //for (int i = 0; i < length + 1; i++)
+            //{
+            //    result_2[i, 2] = Math.Round(result_2[i, 1] * 0, 5);
+            //    _tmp_arr[i] = result_2[i, 2] / ((double)length - 1);
+            //}
+            //result_2[(int)length, 2] = _tmp_arr.Sum();
+            //double count_mult = result_2[(int)length, 2];
 
-            print_data(result_2, (int)length + 1, str_2, "1 2 3", "4");
-            Console.WriteLine("1 - кількість блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці) в усіх числах довжини" + n.ToString() + " біт");
-            Console.WriteLine("2 - середня кількість блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці), що зустрічається у одному числі, що має довжину" + n.ToString() + " біт");
-            Console.WriteLine("3 - в середньому на скільки операцій множення буде менше");
-            Console.WriteLine();
-            Console.WriteLine();
+            //print_data(result_2, (int)length + 1, str_2, "1 2 3", "4");
+            comments.Add("1 - кількість блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці) в усіх числах довжини" + n.ToString() + " біт");
+            comments.Add("2 - середня кількість блоків виду 10..00 (довжина блоку дорівнює номеру рядка таблиці), що зустрічається у одному числі, що має довжину" + n.ToString() + " біт");
+            comments.Add("3 - в середньому на скільки операцій множення буде менше");
             return result_2;
         }
 
-        private static double[,] Pow_Table_1(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
+        private static double[,] Pow_Table_1(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
+            comments = new List<object>();
             double log2_length = Math.Log((int)length + 1, 2) + 2;
             string str1 = "Підрахунок кількості блоків для модифікованої класичної таблиці передобчислень #2 (на початку дві одиниці  замість однієї). Довжина вікна " + log2_length.ToString();
             str1 += " біт. Кількість елементів таблиці " + length.ToString();
             str1 += ". Розглянуті всі числа довжиною " + n.ToString() + " біт";
+            comments.Add(str1);
+
             double[,] result_1 = new double[(int)length + 1, 3];
             int count_rand = numbers.Count;
             for (int r = 0; r < count_rand; r++)
@@ -309,17 +313,18 @@ namespace Recearch_Pow
             result_1[(int)length, 2] = sum_of_column(result_1, 2);
             double count_mult = result_1[(int)length, 2];
             print_data(result_1, (int)length + 1, str1, "1 2 3", "4");
-            Console.WriteLine("1 - кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2");
-            Console.WriteLine("2 - середня кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2, що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
-            Console.WriteLine("3 - в середньому на скільки операцій множення буде менше");
+            comments.Add("1 - кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2");
+            comments.Add("2 - середня кількість блоків відповідного типу для модифікованої класичної таблиці передобчислень #2, що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
+            comments.Add("3 - в середньому на скільки операцій множення буде менше");
             return result_1;
         }
 
-        private static double[,] Pow_Table_2(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = false)
+        private static double[,] Pow_Table_2(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
+            comments = new List<object>();
             BigInteger len_optimal = 0;
             var result_optimal = new double[(int)length + 1, 3];
-            string str1 = "Підрахунок кількості блоків виду 11..11 (значення номеру рядка в таблиці плюс 1 відповідає кількості одиниць у блоці). Перший елемент таблиці 11, другий 111 і т.д. Розглянуті всі числа довжиною" + n.ToString() + " біт";
+            comments.Add("Підрахунок кількості блоків виду 11..11 (значення номеру рядка в таблиці плюс 1 відповідає кількості одиниць у блоці). Перший елемент таблиці 11, другий 111 і т.д. Розглянуті всі числа довжиною" + n.ToString() + " біт");
             double[,] result_1 = new double[(int)n, 2];
             int count_rand = numbers.Count;
             for (var r = 0; r < count_rand; r++)
@@ -345,12 +350,12 @@ namespace Recearch_Pow
                 }
             }
             result_1 = Compute_second_value(result_1, (int)count_rand);
-            print_data(result_1, (int)length + 1, str1, "1 2", "4");
-            Console.WriteLine("1 - кількість блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1)");
-            Console.WriteLine("2 - середня блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1), що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
+            //print_data(result_1, (int)length + 1, str1, "1 2", "4");
+            comments.Add("1 - кількість блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1)");
+            comments.Add("2 - середня блоків виду 11..11 (довжина блоку дорівнює номеру рядка таблиці плюс 1), що зустрічається у одному числі, що має довжину " + n.ToString() + " біт");
 
 
-            string str2 = "Підрахунок кількості блоків виду 11..11 з обмеженою довжиною вікна. Максимально можлива довжина вікна ', sim2str(len), ' біт. Кількість елементів таблиці " + length.ToString() + ". Розглянуті всі числа довжиною " + n.ToString() + " біт";
+            comments.Add("Підрахунок кількості блоків виду 11..11 з обмеженою довжиною вікна. Максимально можлива довжина вікна ', sim2str(len), ' біт. Кількість елементів таблиці " + length.ToString() + ". Розглянуті всі числа довжиною " + n.ToString() + " біт");
             BigInteger max_length = length;
             int count_mult_optimal = -100000;
 
@@ -394,14 +399,15 @@ namespace Recearch_Pow
                     count_mult_optimal = (int)count_mult;
                 }
 
-                print_data(result_optimal, (int)len_optimal + 1, str2, "1 2 3", "4");
+                //print_data(result_optimal, (int)len_optimal + 1, str2, "1 2 3", "4");
             }
             return result_optimal;
         }
 
-        private static double[,] Pow_Table_5(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_5(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
-            Console.WriteLine("Змішана таблиця #1 (11..11 та 10..01)");
+            comments = new List<object>();
+            comments.Add("Змішана таблиця #1 (11..11 та 10..01)");
             string str1 = "Підрахунок кількості блоків виду 11..11 (номер рядка в таблиці плюс 1 відповідає кількості одиниць у блоці). Перший елемент таблиці result_1 це 11, наступний 111 і т.д. Розглянуті всі числа довжиною" + n.ToString() + " біт";
             string str2 = "Підрахунок кількості блоків виду 10..01(номер рядка в таблиці плюс 2 відповідає кількості біт у блоці).Перший елемент таблиці result_2 це 101, наступний 1001 і т.д.Розглянуті всі числа довжиною" + n.ToString() + " біт";
             int len_1_optimal = 0;
@@ -550,13 +556,17 @@ namespace Recearch_Pow
                 }
                 print_data(result_optimal_1, (int)len_1_optimal + 1, str1, "1 2 3", "4");
                 print_data(result_optimal_2, (int)len_2_optimal + 1, str2, "1 2 3", "4");
+
+                comments.Add(str1);
+                comments.Add(str2);
             }
             return result_optimal_2;
         }
 
-        private static double[,] Pow_Table_6(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_6(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
-            Console.WriteLine("Змішана таблиця #1 (11..11 та 10101..101)");
+            comments = new List<object>();
+            comments.Add("Змішана таблиця #1 (11..11 та 10101..101)");
             string str1 = "Підрахунок кількості блоків виду 11..11 (номер рядка в таблиці плюс 1 відповідає кількості одиниць у блоці). Перший елемент таблиці result_1 це 11, наступний 111 і т.д. Розглянуті всі числа довжиною" + n.ToString() + " біт";
             string str2 = "Підрахунок кількості блоків виду 10101...101(номер рядка в таблиці плюс 2 відповідає кількості біт у блоці).Перший елемент таблиці result_2 це 101, наступний 1001 і т.д.Розглянуті всі числа довжиною" + n.ToString() + " біт";
             int len_1_optimal = 0;
@@ -737,12 +747,16 @@ namespace Recearch_Pow
                 }
                 print_data(result_optimal_1, (int)len_1_optimal + 1, str1, "1 2 3", "4");
                 print_data(result_optimal_2, (int)len_2_optimal + 1, str2, "1 2 3", "4");
+
+                comments.Add(str1);
+                comments.Add(str2);
             }
             return result_optimal_2;
         }
 
-        private static double[,] Pow_Table_7(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_7(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
+            comments = new List<object>();
             Console.WriteLine("Змішана таблиця #3 (10..01 та 1011..1)");
             string str1 = "Підрахунок кількості блоків виду 11..11 (номер рядка в таблиці плюс 1 відповідає кількості одиниць у блоці). Перший елемент таблиці result_1 це 11, наступний 111 і т.д. Розглянуті всі числа довжиною " + n.ToString() + " біт";
             string str2 = "Підрахунок кількості блоків виду 10..01 (номер рядка в таблиці плюс 2 відповідає кількості біт у блоці). Перший елемент таблиці result_2 це 101, наступний 1001 і т.д. Розглянуті всі числа довжиною " + n.ToString() + " біт";
@@ -925,12 +939,16 @@ namespace Recearch_Pow
                 }
                 print_data(result_optimal_1, len_1_optimal + 1, str1, "1 2 3", "4");
                 print_data(result_optimal_2, len_2_optimal + 1, str2, "1 2 3", "4");
+
+                comments.Add(str1);
+                comments.Add(str2);
             }
             return result_optimal_2;
         }
 
-        private static double[,] Pow_Table_8(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_8(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
+            comments = new List<object>();
             double log2_max = Math.Log((int)length + 1, 2);
 
             int count_mult_optimal = -100000;
@@ -1020,39 +1038,48 @@ namespace Recearch_Pow
             }
             print_data(result_optimal_1, len_1_optimal + 1, str1, "1 2 3", "4");
             print_data(result_optimal_2, len_2_optimal + 1, str2, "1 2 3", "4");
+
+            comments.Add(str1);
+            comments.Add(str2);
             return result_optimal_2;
         }
 
-        private static double[,] Pow_Table_9(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_9(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
-            return method_used_formula(6, 0, -3, 3, length, n, numbers, isRand, fl);
+            comments = new List<object>();
+            return method_used_formula(6, 0, -3, 3, length, n, numbers, out comments, isRand, fl);
         }
 
-        private static double[,] Pow_Table_10(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_10(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
-            return method_used_formula(4, 0, -1, 3, length, n, numbers, isRand, fl);
+            comments = new List<object>();
+            return method_used_formula(4, 0, -1, 3, length, n, numbers, out comments, isRand, fl);
         }
 
-        private static double[,] Pow_Table_11(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_11(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
-            return method_used_formula(3, 0, 0, 2, length, n, numbers, isRand, fl);
+            comments = new List<object>();
+            return method_used_formula(3, 0, 0, 2, length, n, numbers, out comments, isRand, fl);
         }
 
-        private static double[,] Pow_Table_12(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_12(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
-            return method_used_formula(3, 1, -1, 2, length, n, numbers, isRand, fl);
+            comments = new List<object>();
+            return method_used_formula(3, 1, -1, 2, length, n, numbers, out comments, isRand, fl);
         }
 
-        private static double[,] Pow_Table_13(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_13(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
-            return method_used_formula(2, 0, 1, 2, length, n, numbers, isRand, fl);
+            comments = new List<object>();
+            return method_used_formula(2, 0, 1, 2, length, n, numbers, out comments, isRand, fl);
         }
 
 
 
 
-        private static double[,] method_used_formula(int a, int b, int c, int values_add_count_mult, BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] method_used_formula(int a, int b, int c, int values_add_count_mult, BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
+            comments = new List<object>();
             int max_length = (int)length;
 
             int count_mult_optimal = -100000;
@@ -1111,12 +1138,15 @@ namespace Recearch_Pow
                 }
             }
             print_data(result_optimal_1, len_1_optimal + 1, str1, "1 2 3", "4");
+
+            comments.Add(str1);
             return result_optimal_1;
         }
 
 
-        private static double[,] Pow_Table_14(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_14(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
+            comments = new List<object>();
             int max_length = (int)length;
 
             int count_mult_optimal = -100000;
@@ -1209,11 +1239,15 @@ namespace Recearch_Pow
             }
             print_data(result_optimal_1, len_1_optimal + 1, str1, "1 2 3", "4");
             print_data(result_optimal_1, len_1_optimal + 1, str1, "1 2 3", "4");
+            
+            comments.Add(str1);
+            comments.Add(str2);
             return result_optimal_2;
         }
 
-        private static double[,] Pow_Table_15(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_15(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
+            comments = new List<object>();
             int max_length = (int)length;
 
             int count_mult_optimal = -100000;
@@ -1272,11 +1306,14 @@ namespace Recearch_Pow
                 }
             }
             print_data(result_optimal_1, len_1_optimal + 1, str1, "1 2 3", "4");
+
+            comments.Add(str1);
             return result_optimal_1;
         }
 
-        private static double[,] Pow_Table_16(BigInteger length, BigInteger n, List<BigInteger> numbers, bool isRand = true, bool fl = true)
+        private static double[,] Pow_Table_16(BigInteger length, BigInteger n, List<BigInteger> numbers, out List<object> comments, bool isRand = true, bool fl = false)
         {
+            comments = new List<object>();
             int max_length = (int)length;
 
             int count_mult_optimal = -100000;
@@ -1327,7 +1364,7 @@ namespace Recearch_Pow
 
 
                 int count_build_prime = 2;
-                double[] table_temp = new double[2];
+                double[] table_temp = new double[4];
                 table_temp[0] = 2;
                 int inc = 0;
                 int tmp = 0;
@@ -1359,6 +1396,8 @@ namespace Recearch_Pow
             }
             
             print_data(result_optimal_1, len_1_optimal + 1, str1, "1 2 3", "4");
+            comments.Add(str1);
+
             return result_optimal_1;
         }
 
